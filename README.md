@@ -1,6 +1,6 @@
 # Server
 
-Server is the server for worms or burns mobile app
+Server is the server for worms or burns mobile app.
 
 ## License
 

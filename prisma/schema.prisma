@@ -1,0 +1,159 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+
+model User {
+  id String @id @default(uuid()) @db.Uuid
+  displayName String? @db.VarChar(255)
+  email String @unique @db.VarChar(255)
+  photoURL String?
+  phoneNumber String? @db.VarChar(255)
+  bio String?
+  password String
+  notificationPreferences Json?
+  accountStatus Json?
+  privacySettings Json?
+  isDeleted Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+  subscription UserSubscription? @relation(fields: [subscriptionId],references: [id])
+  subscriptionId String? @db.Uuid
+
+  checkListItems CheckListItem[]
+  userDocuments UserDocument[]
+  favoriteServiceProviders UserFavoriteServiceProvider[]
+
+  @@map("users")
+}
+
+model Category {
+  id String @id @default(uuid()) @db.Uuid
+  iconName String? @db.VarChar(255)
+  title String @unique @db.VarChar(255)
+  description String?
+  itemOrder Int @unique
+  isActive Boolean @default(true)
+  isDeleted Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  providers ServiceProvider[]  // Reverse relation (optional but helpful)
+  checkListItems CheckListItem[]
+  // table name: plural form of the item
+  @@map("categories")
+}
+
+model CheckListItem {
+  id String @id @default(uuid()) @db.Uuid
+  title String @db.VarChar(255)
+  category Category @relation(fields:[categoryId], references:[id])
+  categoryId String @db.Uuid
+  itemOrder Int
+  user User @relation(fields:[userId], references: [id])
+  userId String @db.Uuid
+  isCompleted Boolean @default(false)
+  isDeleted Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@map("checkListItems")
+}
+
+model ServiceProvider {
+  id String @id @default(uuid()) @db.Uuid
+  name String @db.VarChar(255)
+  categories Category[] // ✅ Many-to-many relation
+  description String
+  latitude Float?
+  longitude Float?
+  contactInfo Json?
+  servicesOffered String[]
+  operationHours Json?
+  isVerified Boolean @default(true)
+  isDeleted Boolean @default(false)
+  logoUrl String?
+  images Json? // Use Json instead of String[]
+  averageRating Int?
+  reviewCount Int?
+  tags Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  users UserFavoriteServiceProvider[] // favoriteServiceProvider
+
+  @@map("serviceProviders")
+}
+
+model UserFavoriteServiceProvider {
+  userId String @db.Uuid
+  serviceProviderId String @db.Uuid
+  isDeleted Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id])
+  serviceProvider ServiceProvider @relation(fields: [serviceProviderId], references: [id])
+
+  @@id([userId,serviceProviderId]) // Composite primary key
+}
+
+model UserDocument {
+  id String @id @default(uuid()) @db.Uuid
+  user User @relation(fields:[userId], references: [id])
+  userId String @db.Uuid
+  title String @db.VarChar(255)
+  description String?
+  categoryId String?
+  templateId String?
+  fileUrl String?
+  filePathInStorage String?
+  localFilePath String?
+  fileName String?
+  fileType String?
+  fileSize Int?
+  encryptionIv String?
+  isDeleted Boolean @default(false)
+  // Security/Access
+  isPrivate Boolean?
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+  // Searchability
+  searchText String?
+  isAvailableOffline Boolean?
+  isEncrypted Boolean?
+  // Optional fields
+  tags Json?
+  notes String?
+
+  @@map("userDocuments")
+}
+
+model UserSubscription {
+  id String @id @default(uuid()) @db.Uuid
+  planId String @db.VarChar(255)
+  status Boolean @default(true)
+  startDate DateTime 
+  endDate DateTime?
+
+  users User[]
+
+  @@map("userSubscriptions")
+}

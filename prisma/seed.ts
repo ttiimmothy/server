@@ -77,13 +77,13 @@ async function main() {
     where: {title:"New partnership"},
     update:{},
     create:{
-      title: "PNew partnership",
+      title: "New partnership",
       iconName: "spa",
       itemOrder: 6
     }
   })
 
-  const checkListItem = await prisma.checkListItem.create({
+  const checkListItem = await prisma.checkListItem.create({ // use create because itemOrder can be duplicated
     data: {
       title: "Create a list of online accounts",
       categoryId: digitalLegacy.id,
@@ -92,6 +92,15 @@ async function main() {
     }
   })
 
+  await prisma.serviceProvider.upsert({
+    where: {name: "service provider"},
+    update: {},
+    create: {
+      name: "service provider",
+      description: "description",
+      
+    }
+  })
 
   console.log({ user, digitalLegacy, checkListItem })
 }

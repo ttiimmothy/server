@@ -75,8 +75,8 @@ model CheckListItem {
 
 model ServiceProvider {
   id String @id @default(uuid()) @db.Uuid
-  name String @db.VarChar(255)
-  categories Category[] // ✅ Many-to-many relation
+  name String @db.VarChar(255) @unique
+  categories Category[] // Many-to-many relation
   description String
   latitude Float?
   longitude Float?

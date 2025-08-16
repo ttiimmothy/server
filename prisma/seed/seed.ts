@@ -6,7 +6,7 @@ dotenv.config()
 
 const prisma = new PrismaClient();
 
-async function main() {
+const seed = async () => {
   const hashPassword = await bcrypt.hash(process.env.SEED_USER_PASSWORD as string, 10)
   const user = await prisma.user.upsert({
     where: { email: 'timothyemail805@gmail.com' },
@@ -83,26 +83,55 @@ async function main() {
     }
   })
 
-  const checkListItem = await prisma.checkListItem.create({ // use create because itemOrder can be duplicated
-    data: {
-      title: "Create a list of online accounts",
-      categoryId: digitalLegacy.id,
-      itemOrder: 1,
-      userId: user.id
+  await prisma.category.upsert({
+    where: {title:"Family death"},
+    update:{},
+    create:{
+      title: "Family death",
+      iconName: "insert-drive-file",
+      itemOrder: 7,
+      description: "Issues related to family death"
     }
   })
+
+  const checklistExist = await prisma.checklist.findFirst({where: {
+    title: "Create a list of online accounts"
+  }})
+  let checklist
+  if (!checklistExist) {
+    checklist = await prisma.checklist.create({ // use create because itemOrder can be duplicated
+      data: {
+        title: "Create a list of online accounts",
+        categoryId: digitalLegacy.id,
+        itemOrder: 1,
+        userId: user.id
+      }
+    })
+  }
 
   await prisma.serviceProvider.upsert({
     where: {name: "service provider"},
     update: {},
     create: {
       name: "service provider",
+      categories: [digitalLegacy.id],
       description: "description",
-      
+      latitude: 23.8,
+      longitude: 129.3,
+      servicesOffered: ["account checking", "accounting", "assets protection"],
+      operationHours: {
+        "Mon": "09:00 - 17:00",
+        "Tue": "09:00 - 17:00",
+        "Wed": "09:00 - 17:00",
+        "Thu": "09:00 - 17:00",
+        "Fri": "09:00 - 17:00",
+        "Sat": "off",
+        "Sun": "off"
+      }
     }
   })
 
-  console.log({ user, digitalLegacy, checkListItem })
+  console.log({ user, digitalLegacy, checklist })
 }
 
-main();
+seed();

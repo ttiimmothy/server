@@ -17,143 +17,146 @@ model User {
   id String @id @default(uuid()) @db.Uuid
   displayName String? @db.VarChar(255)
   email String @unique @db.VarChar(255)
-  photoURL String?
-  phoneNumber String? @db.VarChar(255)
+  photoURL String? @map("photo_url")
+  phoneNumber String? @db.VarChar(255) @map("phone_number")
   bio String?
   password String
-  notificationPreferences Json?
-  accountStatus Json?
-  privacySettings Json?
-  isDeleted Boolean @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  deletedAt DateTime?
-  subscription UserSubscription? @relation(fields: [subscriptionId],references: [id])
-  subscriptionId String? @db.Uuid
+  notificationPreferences Json? @map("notification_preferences")
+  accountStatus Json? @map("account_status")
+  privacySettings Json? @map("privacy_settings")
+  isDeleted Boolean @default(false) @map("is_deleted")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 
-  checkListItems CheckListItem[]
-  userDocuments UserDocument[]
-  favoriteServiceProviders UserFavoriteServiceProvider[]
+  subscription Subscription? @relation(fields: [subscriptionId],references: [id])
+  subscriptionId String? @db.Uuid @map("subscription_id")
+
+  checkListItems Checklist[]
+  documents Document[]
+  favoriteServiceProviders FavoriteServiceProvider[]
 
   @@map("users")
 }
 
 model Category {
   id String @id @default(uuid()) @db.Uuid
-  iconName String? @db.VarChar(255)
+  iconName String? @db.VarChar(255) @map("icon_name")
   title String @unique @db.VarChar(255)
   description String?
-  itemOrder Int @unique
-  isActive Boolean @default(true)
-  isDeleted Boolean @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  deletedAt DateTime?
+  itemOrder Int @unique @map("item_order")
+  isActive Boolean @default(true) @map("is_active")
+  isDeleted Boolean @default(false) @map("is_deleted")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 
-  providers ServiceProvider[]  // Reverse relation (optional but helpful)
-  checkListItems CheckListItem[]
+  checkListItems Checklist[]
   // table name: plural form of the item
   @@map("categories")
 }
 
-model CheckListItem {
+model Checklist {
   id String @id @default(uuid()) @db.Uuid
   title String @db.VarChar(255)
-  category Category @relation(fields:[categoryId], references:[id])
-  categoryId String @db.Uuid
-  itemOrder Int
+  itemOrder Int @map("item_order")
   user User @relation(fields:[userId], references: [id])
   userId String @db.Uuid
-  isCompleted Boolean @default(false)
-  isDeleted Boolean @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  deletedAt DateTime?
+  isCompleted Boolean @default(false) @map("is_completed")
+  isDeleted Boolean @default(false) @map("is_deleted")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 
-  @@map("checkListItems")
+  category Category @relation(fields:[categoryId], references:[id])
+  categoryId String @db.Uuid @map("category_id")
+
+  @@map("checklists")
 }
 
 model ServiceProvider {
   id String @id @default(uuid()) @db.Uuid
   name String @db.VarChar(255) @unique
-  categories Category[] // Many-to-many relation
+  categories String[] // Many-to-many relation
   description String
   latitude Float?
   longitude Float?
   contactInfo Json?
-  servicesOffered String[]
-  operationHours Json?
-  isVerified Boolean @default(true)
-  isDeleted Boolean @default(false)
-  logoUrl String?
+  servicesOffered String[] @map("services_offered")
+  operationHours Json? @map("operation_hours")
+  isVerified Boolean @default(true) @map("is_verified")
+  isDeleted Boolean @default(false) @map("is_deleted")
+  logoUrl String? @map("logo_url")
   images Json? // Use Json instead of String[]
-  averageRating Int?
-  reviewCount Int?
+  averageRating Int? @map("average_rating")
+  reviewCount Int? @map("review_count")
   tags Json?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  deletedAt DateTime?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 
-  users UserFavoriteServiceProvider[] // favoriteServiceProvider
+  users FavoriteServiceProvider[] // favoriteServiceProvider
 
-  @@map("serviceProviders")
+  @@map("serviceproviders")
 }
 
-model UserFavoriteServiceProvider {
-  userId String @db.Uuid
-  serviceProviderId String @db.Uuid
-  isDeleted Boolean @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  deletedAt DateTime?
+model FavoriteServiceProvider {
+  isDeleted Boolean @default(false) @map("is_deleted")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
 
   user User @relation(fields: [userId], references: [id])
   serviceProvider ServiceProvider @relation(fields: [serviceProviderId], references: [id])
+  userId String @db.Uuid @map("user_id")
+  serviceProviderId String @db.Uuid @map("service_provider_id")
 
   @@id([userId,serviceProviderId]) // Composite primary key
+  @@map("favoriteserviceproviders")
 }
 
-model UserDocument {
+model Document {
   id String @id @default(uuid()) @db.Uuid
   user User @relation(fields:[userId], references: [id])
-  userId String @db.Uuid
+  userId String @db.Uuid @map("user_id")
+  itemOrder Int @map("item_order")
   title String @db.VarChar(255)
   description String?
-  categoryId String?
-  templateId String?
-  fileUrl String?
-  filePathInStorage String?
-  localFilePath String?
-  fileName String?
-  fileType String?
-  fileSize Int?
-  encryptionIv String?
-  isDeleted Boolean @default(false)
+  categoryId String @map("category_id")
+  templateId String? @map("template_id")
+  fileUrl String? @map("file_url")
+  filePathInStorage String? @map("file_path_in_storage")
+  localFilePath String? @map("local_file_path")
+  fileName String? @map("file_name")
+  fileType String? @map("file_type")
+  fileSize Int? @map("file_size")
+  encryptionIv String? @map("encryption_iv")
+  isDeleted Boolean @default(false) @map("is_deleted")
   // Security/Access
-  isPrivate Boolean?
+  isPrivate Boolean? @map("is_private") 
   // Timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  deletedAt DateTime?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
   // Searchability
-  searchText String?
-  isAvailableOffline Boolean?
+  searchText String? @map("search_text")
+  isAvailableOffline Boolean? @map("is_available_offline")
   isEncrypted Boolean?
-  // Optional fields
   tags Json?
+  // Optional fields
   notes String?
 
-  @@map("userDocuments")
+  @@map("documents")
 }
 
-model UserSubscription {
+model Subscription {
   id String @id @default(uuid()) @db.Uuid
-  planId String @db.VarChar(255)
+  plan String @db.VarChar(255)
   status Boolean @default(true)
-  startDate DateTime 
-  endDate DateTime?
+  startDate DateTime  @map("start_date")
+  endDate DateTime? @map("end_date")
 
   users User[]
 
-  @@map("userSubscriptions")
+  @@map("subscriptions")
 }

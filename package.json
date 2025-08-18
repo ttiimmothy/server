@@ -3,14 +3,14 @@
   "version": "0.0.1",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node -r tsconfig-paths/register index.ts",
+    "start": "ts-node-dev -r tsconfig-paths/register index.ts",
     "build": "tsc",
     "prod": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint \"*.ts\" --fix",
     "seed": "ts-node prisma/seed/seed.ts",
-    "seed:checklist": "ts-node prisma/seed/checklist.ts",
-    "seed:document": "ts-node prisma/seed/document.ts"
+    "seed:checklist": "ts-node prisma/seed/checklistSeed.ts",
+    "seed:document": "ts-node prisma/seed/documentSeed.ts"
   },
   "author": "Timothy",
   "license": "MPL-2.0",

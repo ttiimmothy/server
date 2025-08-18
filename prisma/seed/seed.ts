@@ -18,11 +18,58 @@ const seed = async () => {
     },
   })
 
-  const digitalLegacy = await prisma.category.upsert({
-    where: { title: "Digital legacy" },
+  await prisma.category.upsert({
+    where: { name: "Funeral and memorial" },
     update: {},
     create: {
-      title: "Digital legacy",
+      name: "Funeral and memorial",
+      iconName: "church",
+      itemOrder: 1,
+      description:"Plan and manage funeral or memorial services."
+    },
+  })
+  
+  await prisma.category.upsert({
+    where: {name: "Notifications and contacts"},
+    update: {},
+    create: {
+      name: "Notifications and contacts",
+      iconName: "contact-mail",
+      itemOrder: 2,
+      description: "Notify organizations and manage accounts."
+    }
+  })
+
+
+  await prisma.category.upsert({
+    where: { name: "Legal and financial" },
+    update: {},
+    create: {
+      name: "Legal and financial",
+      iconName: "account-balance",
+      itemOrder: 3,
+      description:"Address wills, estates, insurance, and financial assets."
+    },
+  })
+
+  await prisma.category.upsert({
+    where: {name:"Personal well being"},
+    update:{},
+    create:{
+      name: "Personal well being",
+      iconName: "spa",
+      itemOrder: 4,
+      description: "Resources for grief support and self-care."
+    }
+  })
+
+
+
+  const digitalLegacy = await prisma.category.upsert({
+    where: { name: "Digital legacy" },
+    update: {},
+    create: {
+      name: "Digital legacy",
       iconName: "devices",
       itemOrder: 5,
       description:"Manage online accounts, social media, and digital assets."
@@ -30,64 +77,21 @@ const seed = async () => {
   })
 
   await prisma.category.upsert({
-    where: { title: "Funeral and memorial" },
-    update: {},
-    create: {
-      title: "Funeral and memorial",
-      iconName: "church",
-      itemOrder: 1,
-      description:"Plan and manage funeral or memorial services."
-    },
-  })
-
-  await prisma.category.upsert({
-    where: { title: "Legal and financial" },
-    update: {},
-    create: {
-      title: "Legal and financial",
-      iconName: "account-balance",
-      itemOrder: 3,
-      description:"Address wills, estates, insurance, and financial assets."
-    },
-  })
-  
-  await prisma.category.upsert({
-    where: {title: "Notifications and contacts"},
-    update: {},
-    create: {
-      title: "Notifications and contacts",
-      iconName: "contact-mail",
-      itemOrder: 2,
-      description: "Notify organizations and manage accounts."
-    }
-  })
-
-  await prisma.category.upsert({
-    where: {title:"Personal well being"},
+    where: {name:"New partnership"},
     update:{},
     create:{
-      title: "Personal well being",
+      name: "New partnership",
       iconName: "spa",
-      itemOrder: 4,
-      description: "Resources for grief support and self-care."
+      itemOrder: 6,
+      description:"Partnership is a test category."
     }
   })
 
   await prisma.category.upsert({
-    where: {title:"New partnership"},
+    where: {name:"Family death"},
     update:{},
     create:{
-      title: "New partnership",
-      iconName: "spa",
-      itemOrder: 6
-    }
-  })
-
-  await prisma.category.upsert({
-    where: {title:"Family death"},
-    update:{},
-    create:{
-      title: "Family death",
+      name: "Family death",
       iconName: "insert-drive-file",
       itemOrder: 7,
       description: "Issues related to family death"
@@ -95,13 +99,13 @@ const seed = async () => {
   })
 
   const checklistExist = await prisma.checklist.findFirst({where: {
-    title: "Create a list of online accounts"
+    name: "Create a list of online accounts"
   }})
   let checklist
   if (!checklistExist) {
     checklist = await prisma.checklist.create({ // use create because itemOrder can be duplicated
       data: {
-        title: "Create a list of online accounts",
+        name: "Create a list of online accounts",
         categoryId: digitalLegacy.id,
         itemOrder: 1,
         userId: user.id
@@ -114,7 +118,7 @@ const seed = async () => {
     update: {},
     create: {
       name: "service provider",
-      categories: [digitalLegacy.id],
+      categoryIds: [digitalLegacy.id],
       description: "description",
       latitude: 23.8,
       longitude: 129.3,

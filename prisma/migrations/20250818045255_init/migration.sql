@@ -23,10 +23,9 @@ CREATE TABLE "public"."users" (
 CREATE TABLE "public"."categories" (
     "id" UUID NOT NULL,
     "icon_name" VARCHAR(255),
-    "title" VARCHAR(255) NOT NULL,
+    "name" VARCHAR(255) NOT NULL,
     "description" TEXT,
     "item_order" INTEGER NOT NULL,
-    "is_active" BOOLEAN NOT NULL DEFAULT true,
     "is_deleted" BOOLEAN NOT NULL DEFAULT false,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
@@ -38,7 +37,7 @@ CREATE TABLE "public"."categories" (
 -- CreateTable
 CREATE TABLE "public"."checklists" (
     "id" UUID NOT NULL,
-    "title" VARCHAR(255) NOT NULL,
+    "name" VARCHAR(255) NOT NULL,
     "item_order" INTEGER NOT NULL,
     "userId" UUID NOT NULL,
     "is_completed" BOOLEAN NOT NULL DEFAULT false,
@@ -55,7 +54,7 @@ CREATE TABLE "public"."checklists" (
 CREATE TABLE "public"."serviceproviders" (
     "id" UUID NOT NULL,
     "name" VARCHAR(255) NOT NULL,
-    "categories" TEXT[],
+    "categoryIds" TEXT[],
     "description" TEXT NOT NULL,
     "latitude" DOUBLE PRECISION,
     "longitude" DOUBLE PRECISION,
@@ -77,7 +76,7 @@ CREATE TABLE "public"."serviceproviders" (
 );
 
 -- CreateTable
-CREATE TABLE "public"."userfavoriteserviceproviders" (
+CREATE TABLE "public"."favoriteserviceproviders" (
     "is_deleted" BOOLEAN NOT NULL DEFAULT false,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
@@ -85,16 +84,16 @@ CREATE TABLE "public"."userfavoriteserviceproviders" (
     "user_id" UUID NOT NULL,
     "service_provider_id" UUID NOT NULL,
 
-    CONSTRAINT "userfavoriteserviceproviders_pkey" PRIMARY KEY ("user_id","service_provider_id")
+    CONSTRAINT "favoriteserviceproviders_pkey" PRIMARY KEY ("user_id","service_provider_id")
 );
 
 -- CreateTable
 CREATE TABLE "public"."documents" (
     "id" UUID NOT NULL,
     "user_id" UUID NOT NULL,
-    "title" VARCHAR(255) NOT NULL,
+    "name" VARCHAR(255) NOT NULL,
     "description" TEXT,
-    "category_id" TEXT,
+    "category_id" UUID NOT NULL,
     "template_id" TEXT,
     "file_url" TEXT,
     "file_path_in_storage" TEXT,
@@ -132,7 +131,7 @@ CREATE TABLE "public"."subscriptions" (
 CREATE UNIQUE INDEX "users_email_key" ON "public"."users"("email");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "categories_title_key" ON "public"."categories"("title");
+CREATE UNIQUE INDEX "categories_name_key" ON "public"."categories"("name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "categories_item_order_key" ON "public"."categories"("item_order");
@@ -150,10 +149,13 @@ ALTER TABLE "public"."checklists" ADD CONSTRAINT "checklists_userId_fkey" FOREIG
 ALTER TABLE "public"."checklists" ADD CONSTRAINT "checklists_category_id_fkey" FOREIGN KEY ("category_id") REFERENCES "public"."categories"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."userfavoriteserviceproviders" ADD CONSTRAINT "userfavoriteserviceproviders_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."favoriteserviceproviders" ADD CONSTRAINT "favoriteserviceproviders_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."userfavoriteserviceproviders" ADD CONSTRAINT "userfavoriteserviceproviders_service_provider_id_fkey" FOREIGN KEY ("service_provider_id") REFERENCES "public"."serviceproviders"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "public"."favoriteserviceproviders" ADD CONSTRAINT "favoriteserviceproviders_service_provider_id_fkey" FOREIGN KEY ("service_provider_id") REFERENCES "public"."serviceproviders"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."documents" ADD CONSTRAINT "documents_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."documents" ADD CONSTRAINT "documents_category_id_fkey" FOREIGN KEY ("category_id") REFERENCES "public"."categories"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

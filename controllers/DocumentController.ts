@@ -40,7 +40,7 @@ export class DocumentController {
     })
 
     if (searchTerm) {
-      documents.filter(document => document.title.includes(searchTerm))
+      documents.filter(document => document.name.includes(searchTerm))
     }
 
     res.json(documents)

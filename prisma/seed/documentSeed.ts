@@ -11,13 +11,13 @@ const document = async () => {
 
   const category = await prisma.category.findUnique({
     where: {
-      title: "Digital legacy"
+      name: "Digital legacy"
     }
   })
 
   const documentExist = await prisma.document.findFirst({
     where: {
-      itemOrder: 1
+      name: "seed document"
     }
   })
 
@@ -25,8 +25,7 @@ const document = async () => {
     const documentCreate = await prisma.document.create({
       data:{
         userId: user.id,
-        itemOrder: 1,
-        title: "seed document",
+        name: "seed document",
         categoryId: category.id,
         tags: ["tag"]
       }

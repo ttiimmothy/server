@@ -3,27 +3,28 @@ import {PrismaClient} from "@prisma/client";
 const prisma = new PrismaClient;
 
 const checklist = async () => {
-  const category = await prisma.category.findUnique({where: {title: "Family death"}, select: {id: true}})
+  const category = await prisma.category.findUnique({where: {name: "Family death"}, select: {id: true}})
   const user = await prisma.user.findUnique({where: {email: "timothyemail805@gmail.com"}, select: {id: true}})
 
   if (category && user) {
-    const checklistExist1 = await prisma.checklist.findFirst({where: {title: "Confirm and Certify Death"}})
+    const checklistExist1 = await prisma.checklist.findFirst({where: {name: "Confirm and Certify Death"}})
     if (!checklistExist1) {
-      await prisma.checklist.create({
+      const confirm = await prisma.checklist.create({
         data: {
-          title: "Confirm and Certify Death",
+          name: "Confirm and Certify Death",
           categoryId: category.id,
           itemOrder: 1,
           userId: user.id
         }
       })
+      console.log(confirm)
     }
 
-    const checklistExist2 = await prisma.checklist.findFirst({where: {title: "Register the Death"}})
+    const checklistExist2 = await prisma.checklist.findFirst({where: {name: "Register the Death"}})
     if (!checklistExist2) {
       await prisma.checklist.create({
         data: {
-          title: "Register the Death",
+          name: "Register the Death",
           categoryId: category.id,
           itemOrder: 2,
           userId: user.id
@@ -31,22 +32,22 @@ const checklist = async () => {
       })
     }
 
-    const checklistExist3 = await prisma.checklist.findFirst({where: {title: "Funeral Arrangements"}})
+    const checklistExist3 = await prisma.checklist.findFirst({where: {name: "Funeral Arrangements"}})
     if (!checklistExist3) {
       await prisma.checklist.create({
         data: {
-          title: "Funeral Arrangements",
+          name: "Funeral Arrangements",
           categoryId: category.id,
           itemOrder: 3,
           userId: user.id
         }
       })
     }
-    const checklistExist4 = await prisma.checklist.findFirst({where: {title: "Notify Family and Friends"}})
+    const checklistExist4 = await prisma.checklist.findFirst({where: {name: "Notify Family and Friends"}})
     if (!checklistExist4) {
       await prisma.checklist.create({
         data: {
-          title: "Notify Family and Friends",
+          name: "Notify Family and Friends",
           categoryId: category.id,
           itemOrder: 4,
           userId: user.id
@@ -54,11 +55,11 @@ const checklist = async () => {
       })
     }
 
-    const checklistExist5 = await prisma.checklist.findFirst({where: {title: "Consider Organ and Tissue Donation"}})
+    const checklistExist5 = await prisma.checklist.findFirst({where: {name: "Consider Organ and Tissue Donation"}})
     if (!checklistExist5) {
       await prisma.checklist.create({
         data: {
-          title: "Consider Organ and Tissue Donation",
+          name: "Consider Organ and Tissue Donation",
           categoryId: category.id,
           itemOrder: 5,
           userId: user.id
@@ -66,11 +67,11 @@ const checklist = async () => {
       })
     }
     
-    const checklistExist6 = await prisma.checklist.findFirst({where: {title: "Identify the Legal Representative"}})
+    const checklistExist6 = await prisma.checklist.findFirst({where: {name: "Identify the Legal Representative"}})
     if (!checklistExist6) {
       await prisma.checklist.create({
         data: {
-          title: "Identify the Legal Representative",
+          name: "Identify the Legal Representative",
           categoryId: category.id,
           itemOrder: 6,
           userId: user.id
@@ -78,44 +79,44 @@ const checklist = async () => {
       })
     }
 
-    const checklistExist7 = await prisma.checklist.findFirst({where: {title: "Consult with Legal and Financial Professionals"}})
+    const checklistExist7 = await prisma.checklist.findFirst({where: {name: "Consult with Legal and Financial Professionals"}})
     if (!checklistExist7) {
       await prisma.checklist.create({
         data: {
-          title: "Consult with Legal and Financial Professionals",
+          name: "Consult with Legal and Financial Professionals",
           categoryId: category.id,
           itemOrder: 7,
           userId: user.id
         }
       })
     }
-    const checklistExist8 = await prisma.checklist.findFirst({where: {title: "Understand the Division of Property"}})
+    const checklistExist8 = await prisma.checklist.findFirst({where: {name: "Understand the Division of Property"}})
     if (!checklistExist8) {
       await prisma.checklist.create({
         data: {
-          title: "Understand the Division of Property",
+          name: "Understand the Division of Property",
           categoryId: category.id,
           itemOrder: 8,
           userId: user.id
         }
       })
     }
-    const checklistExist9 = await prisma.checklist.findFirst({where: {title: "Claim Entitlements"}})
+    const checklistExist9 = await prisma.checklist.findFirst({where: {name: "Claim Ennamements"}})
     if (!checklistExist9) {
       await prisma.checklist.create({
         data: {
-          title: "Claim Entitlements",
+          name: "Claim Ennamements",
           categoryId: category.id,
           itemOrder: 9,
           userId: user.id
         }
       })
     }
-    const checklistExist10 = await prisma.checklist.findFirst({where: {title: "Notify Government Agencies"}})
+    const checklistExist10 = await prisma.checklist.findFirst({where: {name: "Notify Government Agencies"}})
     if (!checklistExist10) {
       await prisma.checklist.create({
         data: {
-          title: "Notify Government Agencies",
+          name: "Notify Government Agencies",
           categoryId: category.id,
           itemOrder: 10,
           userId: user.id
@@ -123,11 +124,11 @@ const checklist = async () => {
       })
     }
 
-    const checklistExist11 = await prisma.checklist.findFirst({where: {title: "Close Accounts and Subscriptions"}})
+    const checklistExist11 = await prisma.checklist.findFirst({where: {name: "Close Accounts and Subscriptions"}})
     if (!checklistExist11) {
       await prisma.checklist.create({
         data: {
-          title: "Close Accounts and Subscriptions",
+          name: "Close Accounts and Subscriptions",
           categoryId: category.id,
           itemOrder: 11,
           userId: user.id
@@ -135,11 +136,11 @@ const checklist = async () => {
       })
     }
 
-    const checklistExist12 = await prisma.checklist.findFirst({where: {title: "Obtain Death Certificates"}})
+    const checklistExist12 = await prisma.checklist.findFirst({where: {name: "Obtain Death Certificates"}})
     if (!checklistExist12) {
       await prisma.checklist.create({
         data: {
-          title: "Obtain Death Certificates",
+          name: "Obtain Death Certificates",
           categoryId: category.id,
           itemOrder: 12,
           userId: user.id
@@ -147,11 +148,11 @@ const checklist = async () => {
       })
     }
 
-    const checklistExist13 = await prisma.checklist.findFirst({where: {title: "Manage Finances"}})
+    const checklistExist13 = await prisma.checklist.findFirst({where: {name: "Manage Finances"}})
     if (!checklistExist13) {
       await prisma.checklist.create({
         data: {
-          title: "Manage Finances",
+          name: "Manage Finances",
           categoryId: category.id,
           itemOrder: 13,
           userId: user.id
@@ -159,11 +160,11 @@ const checklist = async () => {
       })
     }
 
-    const checklistExist14 = await prisma.checklist.findFirst({where: {title: "Deal with Real Estate"}})
+    const checklistExist14 = await prisma.checklist.findFirst({where: {name: "Deal with Real Estate"}})
     if (!checklistExist14) {
       await prisma.checklist.create({
         data: {
-          title: "Deal with Real Estate",
+          name: "Deal with Real Estate",
           categoryId: category.id,
           itemOrder: 14,
           userId: user.id
@@ -171,11 +172,11 @@ const checklist = async () => {
       })
     }
 
-    const checklistExist15 = await prisma.checklist.findFirst({where: {title: "Protect Against Fraud"}})
+    const checklistExist15 = await prisma.checklist.findFirst({where: {name: "Protect Against Fraud"}})
     if (!checklistExist15) {
       await prisma.checklist.create({
         data: {
-          title: "Protect Against Fraud",
+          name: "Protect Against Fraud",
           categoryId: category.id,
           itemOrder: 15,
           userId: user.id
@@ -183,11 +184,11 @@ const checklist = async () => {
       })
     }
 
-    const checklistExist16 = await prisma.checklist.findFirst({where: {title: "Return Documents"}})
+    const checklistExist16 = await prisma.checklist.findFirst({where: {name: "Return Documents"}})
     if (!checklistExist16) {
       await prisma.checklist.create({
         data: {
-          title: "Return Documents",
+          name: "Return Documents",
           categoryId: category.id,
           itemOrder: 16,
           userId: user.id
@@ -195,11 +196,11 @@ const checklist = async () => {
       })
     }
 
-    const checklistExist17 = await prisma.checklist.findFirst({where: {title: "Coping with Grief"}})
+    const checklistExist17 = await prisma.checklist.findFirst({where: {name: "Coping with Grief"}})
     if (!checklistExist17) {
       await prisma.checklist.create({
         data: {
-          title: "Coping with Grief",
+          name: "Coping with Grief",
           categoryId: category.id,
           itemOrder: 17,
           userId: user.id

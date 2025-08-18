@@ -9,10 +9,10 @@ export class ChecklistController {
     if (!categoryId) {
       res.status(404).json({message: "There is no category id"})
     }
-    const categoryExist = this.prisma.category.findUnique({where: {id: categoryId}})
+    const categoryExist = await this.prisma.category.findUnique({where: {id: categoryId}})
     if(!categoryExist) {
+      console.log()
       res.status(404).json({message: "Category can't be found"})
-      return
     }
     const checklist = await this.prisma.checklist.findMany({
       where: {
@@ -31,18 +31,18 @@ export class ChecklistController {
 
     const filterCategoryByText = await this.prisma.category.findMany({
       where: {
-        title: {
+        name: {
           contains: queryText,
           mode: 'insensitive'
         }
       },
       select: {
-        title: true
+        name: true
       }
     })
     const filterCategoryByCHecklist = await this.prisma.checklist.findMany({
       where: {
-        title: {
+        name: {
           contains: queryText,
           mode: 'insensitive'
         }
@@ -59,7 +59,7 @@ export class ChecklistController {
         }
       },
       select: {
-        title: true
+        name: true
       }
     })
     const searchResult = [...new Set([...filterCategoryByText, ...filterCategoryById])]

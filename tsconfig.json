@@ -1,24 +1,26 @@
 {
   "compilerOptions": {
-    "module": "nodenext",
-    "target": "es2021",
+    "module": "commonjs",
+    "target": "es2020",
+    "lib": ["es6", "dom"],
     "sourceMap": true,
     "allowJs": true,
     "jsx": "react",
     "esModuleInterop": true,
-    "moduleResolution": "nodenext",
+    "moduleResolution": "node",
     "noImplicitReturns": true,
     "noImplicitThis": true,
     "paths": {
       "@/*": [
         "./*"
       ]
-    }
+    },
+    "outDir": "dist"
   },
   "exclude": [
     "node_modules",
-    "build",
     "scripts",
-    "index.js"
+    "index.js",
+    "dist"
   ]
 }

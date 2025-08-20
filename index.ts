@@ -2,6 +2,9 @@ import express from "express";
 import cors from "cors";
 import {routes} from "@/router/routes";
 import cookieParser from "cookie-parser";
+import dotenv from "dotenv";
+
+dotenv.config()
 
 const app = express();
 
@@ -13,7 +16,8 @@ app.use(express.json());
 app.use(cookieParser())
 
 app.use(cors({
-  origin: ["http://localhost:8084"]
+  origin: ["http://localhost:8084"],
+  credentials: true
 }))
 
 app.use("/api", routes);

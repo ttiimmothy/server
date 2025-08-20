@@ -5,7 +5,7 @@
   "scripts": {
     "start": "ts-node-dev -r tsconfig-paths/register index.ts",
     "build": "tsc",
-    "prod": "node index.js",
+    "prod": "node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint \"*.ts\" --fix",
     "seed": "ts-node prisma/seed/seed.ts",
@@ -14,7 +14,8 @@
   },
   "author": "Timothy",
   "license": "MPL-2.0",
-  "description": "",
+  "keywords": "node",
+  "description": "server",
   "dependencies": {
     "@prisma/client": "^6.14.0",
     "bcryptjs": "^3.0.2",

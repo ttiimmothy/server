@@ -5,6 +5,7 @@ import {ChecklistController} from "@/controllers/ChecklistController";
 import {DocumentController} from "@/controllers/DocumentController";
 import {ServiceProviderController} from "@/controllers/ServiceProviderController";
 import {LoginController} from "@/controllers/LoginController";
+import {AuthMiddleware} from "@/middleware/AuthMiddleware";
 
 const prisma = new PrismaClient();
 const categoryController = new CategoryController(prisma);
@@ -13,11 +14,16 @@ const documentController = new DocumentController(prisma)
 const serviceProviderController = new ServiceProviderController(prisma);
 const loginController = new LoginController(prisma)
 
+const authMiddleware = new AuthMiddleware()
+
 export const routes = Router();
 routes.get("/categories", categoryController.getCategories);
 routes.post("/category", categoryController.checkCategoryExist);
-routes.post("/checklist", checklistController.getChecklistByCategoryId)
-routes.post("/checklist/search", checklistController.searchCategoryAndChecklist)
-routes.post("/documents", documentController.getDocuments)
+routes.post("/checklists", checklistController.getChecklistByCategoryId)
+routes.post("/checklists/search", checklistController.searchCategoryAndChecklist)
+routes.post("/documents", authMiddleware.verifyJsonWebToken, documentController.getDocuments)
 routes.get("/serviceproviders", serviceProviderController.getServiceProviders)
-routes.post("/user/login", loginController.login)
+routes.post("/users/login", loginController.login)
+routes.get("/users/current/user", authMiddleware.verifyJsonWebToken, loginController.currentUser)
+routes.get("/users/logout", loginController.currentUser)
+routes.post("/users/register", loginController.register)

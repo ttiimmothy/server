@@ -17,6 +17,7 @@ const loginController = new LoginController(prisma)
 const authMiddleware = new AuthMiddleware()
 
 export const routes = Router();
+
 routes.get("/categories", categoryController.getCategories);
 routes.post("/category", categoryController.checkCategoryExist);
 routes.post("/checklists", checklistController.getChecklistByCategoryId)

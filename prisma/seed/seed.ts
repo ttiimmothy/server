@@ -1,13 +1,13 @@
 import {PrismaClient} from "@prisma/client";
-import bcrypt from "bcryptjs";
-import dotenv from "dotenv";
+import {hash} from "bcryptjs";
+import {config} from "dotenv";
 
-dotenv.config()
+config()
 
 const prisma = new PrismaClient();
 
 const seed = async () => {
-  const hashPassword = await bcrypt.hash(process.env.SEED_USER_PASSWORD as string, 10)
+  const hashPassword = await hash(process.env.SEED_USER_PASSWORD, 10)
   const user = await prisma.user.upsert({
     where: { email: 'timothyemail805@gmail.com' },
     update: {},
@@ -18,7 +18,7 @@ const seed = async () => {
     },
   })
 
-  await prisma.category.upsert({
+  const funeralAndMemorial = await prisma.category.upsert({
     where: { name: "Funeral and memorial" },
     update: {},
     create: {
@@ -106,7 +106,7 @@ const seed = async () => {
     checklist = await prisma.checklist.create({ // use create because itemOrder can be duplicated
       data: {
         name: "Create a list of online accounts",
-        categoryId: digitalLegacy.id,
+        categoryId: funeralAndMemorial.id,
         itemOrder: 1,
         userId: user.id
       }
@@ -135,7 +135,7 @@ const seed = async () => {
     }
   })
 
-  console.log({ user, digitalLegacy, checklist })
+  console.log({ user, funeralAndMemorial, digitalLegacy, checklist })
 }
 
 seed();

@@ -1,13 +1,13 @@
 import {PrismaClient} from "@prisma/client";
-import bcrypt from "bcryptjs";
-import dotenv from "dotenv";
+import {hash} from "bcryptjs";
+import {config} from "dotenv";
 
-dotenv.config()
+config()
 
 const prisma = new PrismaClient();
 
 const seed = async () => {
-  const hashPassword = await bcrypt.hash(process.env.SEED_USER_PASSWORD, 10)
+  const hashPassword = await hash(process.env.SEED_USER_PASSWORD, 10)
   const user = await prisma.user.upsert({
     where: { email: 'timothyemail805@gmail.com' },
     update: {},

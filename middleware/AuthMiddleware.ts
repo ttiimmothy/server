@@ -1,6 +1,6 @@
 import {User} from "@prisma/client";
 import {Request, Response, NextFunction} from "express"
-import jwt from "jsonwebtoken"
+import {verify} from "jsonwebtoken"
 
 export class AuthMiddleware {
   verifyJsonWebToken = async (req: Request & {user: Omit<User, "password">}, res: Response, next: NextFunction) => {
@@ -17,7 +17,7 @@ export class AuthMiddleware {
     const token = req.headers.authorization.split(" ")[1]
 
     try {
-      const payload = jwt.verify(token, process.env.JWT_SECRET) 
+      const payload = verify(token, process.env.JWT_SECRET) 
       req.user = payload
       next()
     } catch (e) {

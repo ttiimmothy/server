@@ -1,17 +1,18 @@
-import express from "express";
+import express,{urlencoded, json} from "express";
 import cors from "cors";
 import {routes} from "@/router/routes";
 import cookieParser from "cookie-parser";
-import dotenv from "dotenv";
+import {config} from "dotenv";
+import {deletePasswordResetToken} from "@/utils/deletePasswordResetToken";
 
-dotenv.config()
+config()
 
 const app = express();
 
 // only require for form submission, parses URL-encoded bodies <form method="POST" action="/submit"></form>
-app.use(express.urlencoded({extended: true}))
+app.use(urlencoded({extended: true}))
 // require for json
-app.use(express.json());
+app.use(json());
 // use cookie
 app.use(cookieParser())
 
@@ -21,6 +22,11 @@ app.use(cors({
 }))
 
 app.use("/api", routes);
+
+// run every hour
+setInterval(() => {
+  deletePasswordResetToken()
+}, 1000 * 60 * 60);
 
 app.listen("8080", () => {
   console.log("listening http://localhost:8080")

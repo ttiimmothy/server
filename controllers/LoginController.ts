@@ -13,6 +13,7 @@ export class LoginController {
     try {
       const {email, password} = req.body
 
+      console.log("aa")
       if (!email || !password) {
         res.status(400).json({error: "email or password is missing"})
         return

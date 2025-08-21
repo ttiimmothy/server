@@ -22,7 +22,9 @@ routes.post("/category", categoryController.checkCategoryExist);
 routes.post("/checklists", checklistController.getChecklistByCategoryId)
 routes.post("/checklists/search", checklistController.searchCategoryAndChecklist)
 routes.post("/documents", authMiddleware.verifyJsonWebToken, documentController.getDocuments)
+
 routes.get("/serviceproviders", serviceProviderController.getServiceProviders)
+
 routes.post("/users/login", loginController.login)
 routes.get("/users/current/user", authMiddleware.verifyJsonWebToken, loginController.currentUser)
 routes.get("/users/logout", loginController.currentUser)

@@ -204,8 +204,8 @@ export class LoginController {
   googleClient = new OAuth2Client(process.env.GOOGLE_WEB_CLIENT_ID)
 
   googleLogin = async (req: Request, res: Response) => {
-    console.log("aa")
     const {token} = req.body
+    console.log(req.body)
 
     if (!token) {
       res.status(400).json({error: "id token is missing"})
@@ -235,9 +235,8 @@ export class LoginController {
         }
       })
 
-      let jwt = sign(checkGoogleUserExist, process.env.JWT_SECRET)
-
       if (checkGoogleUserExist) {
+        const jwt = sign(checkGoogleUserExist, process.env.JWT_SECRET)
         res.json({user: checkGoogleUserExist, token: jwt})
         return
       }
@@ -277,7 +276,7 @@ export class LoginController {
         }
       })
 
-      jwt = sign(user, process.env.JWT_SECRET)
+      const jwt = sign(user, process.env.JWT_SECRET)
       
       res.json({user, token: jwt})
     } catch (e) {

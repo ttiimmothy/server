@@ -205,7 +205,7 @@ export class LoginController {
 
   googleLogin = async (req: Request, res: Response) => {
     const {token} = req.body
-    console.log(req.body)
+    // console.log(req.body)
 
     if (!token) {
       res.status(400).json({error: "id token is missing"})

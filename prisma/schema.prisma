@@ -20,7 +20,8 @@ model User {
   photoURL String? @map("photo_url")
   phoneNumber String? @db.VarChar(255) @map("phone_number")
   bio String?
-  password String
+  password String?
+  googleSub String? @unique @map("google_sub")
   notificationPreferences Json? @map("notification_preferences")
   accountStatus Json? @map("account_status")
   privacySettings Json? @map("privacy_settings")

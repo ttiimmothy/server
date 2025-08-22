@@ -28,6 +28,6 @@ setInterval(() => {
   deletePasswordResetToken()
 }, 1000 * 60 * 60);
 
-app.listen("8080", () => {
-  console.log("listening http://localhost:8080")
+app.listen(8080, "0.0.0.0", () => {
+  console.log("listening http://0.0.0.0:8080")
 })

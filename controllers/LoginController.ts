@@ -1,10 +1,11 @@
 import {PrismaClient, User} from "@prisma/client";
 import {Request, Response} from "express"
 import {compare, hash} from "bcryptjs";
-import {sign} from "jsonwebtoken";
+import { sign, verify } from 'jsonwebtoken';
 import {createTransport} from "nodemailer";
 // node built-in crypto, haven't installed in the dependencies
 import {randomBytes} from "crypto";
+import {OAuth2Client} from "google-auth-library";
 
 export class LoginController {
   constructor(public prisma: PrismaClient) {}
@@ -13,7 +14,6 @@ export class LoginController {
     try {
       const {email, password} = req.body
 
-      console.log("aa")
       if (!email || !password) {
         res.status(400).json({error: "email or password is missing"})
         return
@@ -26,6 +26,13 @@ export class LoginController {
       if (!user) {
         res.status(401).json({error: "There is no this user"})
         return
+      }
+
+      if (!user.password) {
+        res.status(401).json({ 
+          error: "This account is registered via Google login. Please login with Google." 
+        });
+        return;
       }
 
       const match = await compare(password, user.password)
@@ -192,5 +199,90 @@ export class LoginController {
     })
 
     res.json({message: "Password reset successful"})
+  }
+
+  googleClient = new OAuth2Client(process.env.GOOGLE_WEB_CLIENT_ID)
+
+  googleLogin = async (req: Request, res: Response) => {
+    console.log("aa")
+    const {token} = req.body
+
+    if (!token) {
+      res.status(400).json({error: "id token is missing"})
+      return
+    }
+
+    try {
+      const ticket = await this.googleClient.verifyIdToken({
+        idToken: token,
+        // audience: process.env.GOOGLE_WEB_CLIENT_ID
+        audience: [
+          process.env.GOOGLE_IOS_CLIENT_ID,
+          process.env.GOOGLE_ANDROID_CLIENT_ID
+        ], // accept both platforms
+      })
+
+      const payload = ticket.getPayload()
+
+      if (!payload) {
+        res.status(401).json({error: "Can't google login"})
+        return
+      }
+
+      const checkGoogleUserExist = await this.prisma.user.findUnique({
+        where: {
+          googleSub: payload.sub
+        }
+      })
+
+      let jwt = sign(checkGoogleUserExist, process.env.JWT_SECRET)
+
+      if (checkGoogleUserExist) {
+        res.json({user: checkGoogleUserExist, token: jwt})
+        return
+      }
+
+      const checkUserExist = await this.prisma.user.findUnique({
+        where: {
+          email: payload.email
+        }
+      })
+
+      if (!checkUserExist) {
+        const newUser = await this.prisma.user.create({
+          data: {
+            email: payload.email,
+            displayName: payload.name,
+            photoURL: payload.picture,
+            bio: payload.profile,
+            googleSub: payload.sub // sub = subject
+          }
+        })
+
+        const jwtForNewUser = sign(newUser, process.env.JWT_SECRET)
+
+        res.json({user: newUser, token: jwtForNewUser})
+        return
+      }
+
+      const {id, displayName, photoURL, bio} = checkUserExist
+
+      const user = await this.prisma.user.update({
+        where: { id },
+        data: {
+          displayName: displayName ? displayName : payload.name,
+          photoURL: photoURL ? photoURL : payload.picture,
+          bio: bio ? bio : payload.profile,
+          googleSub: payload.sub
+        }
+      })
+
+      jwt = sign(user, process.env.JWT_SECRET)
+      
+      res.json({user, token: jwt})
+    } catch (e) {
+      console.error(e);
+      res.status(401).json({ error: "Invalid token" });
+    }
   }
 }

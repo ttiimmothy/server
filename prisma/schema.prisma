@@ -15,12 +15,12 @@ datasource db {
 
 model User {
   id String @id @default(uuid()) @db.Uuid
-  displayName String? @db.VarChar(255)
   email String @unique @db.VarChar(255)
+  password String?
+  displayName String? @db.VarChar(255)
   photoURL String? @map("photo_url")
   phoneNumber String? @db.VarChar(255) @map("phone_number")
   bio String?
-  password String?
   googleSub String? @unique @map("google_sub")
   notificationPreferences Json? @map("notification_preferences")
   accountStatus Json? @map("account_status")

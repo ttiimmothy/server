@@ -20,6 +20,7 @@ export class ChecklistController {
     const checklist = await this.prisma.checklist.findMany({
       where: {
         categoryId,
+        isDeleted: false
       },
       orderBy: {itemOrder: "asc"}
     })
@@ -39,7 +40,8 @@ export class ChecklistController {
         name: {
           contains: queryText,
           mode: 'insensitive'
-        }
+        },
+        isDeleted: false
       },
       select: {
         name: true
@@ -50,7 +52,8 @@ export class ChecklistController {
         name: {
           contains: queryText,
           mode: 'insensitive'
-        }
+        },
+        isDeleted: false
       },
       select: {
         categoryId: true
@@ -61,7 +64,8 @@ export class ChecklistController {
       where: {
         id: {
           in: filterCategoryByCHecklist.map(id => id.categoryId)
-        }
+        },
+        isDeleted: false
       },
       select: {
         name: true

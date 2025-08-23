@@ -33,6 +33,7 @@ export class DocumentController {
         ...(tagsFilter
           ? { tags: { array_contains: tagsFilter } }
           : {}), // only add filter if tags exist
+        isDeleted: false
       },
       orderBy: {
         [sortBy]: sortDirection

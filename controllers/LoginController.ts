@@ -35,6 +35,11 @@ export class LoginController {
         return;
       }
 
+      if (user.isDeleted) {
+        res.status(400).json({error: "This user is deactivated"})
+        return
+      }
+
       const match = await compare(password, user.password)
       
       if (!match) {
@@ -42,7 +47,7 @@ export class LoginController {
         return
       }
 
-      const {password: _pwd, ...userPayload} = user
+      const {password: userPassword, ...userPayload} = user
 
       const token = sign(userPayload, process.env.JWT_SECRET, 
         // { expiresIn: "48h" }
@@ -66,11 +71,11 @@ export class LoginController {
 
   currentUser = async (req: Request & {user: Omit<User, "password">}, res: Response) => {
     const user = req.user
-
     res.json(user)
   }
 
-  // logout now can delete token in the expo-secure-store by deleteItemAsync in client, not call the logout api
+  // NOTE: logout now can delete token in the expo-secure-store by deleteItemAsync in client, not call the logout api
+  //
   // logout = async (req: Request, res: Response) => {
   //   // not use cookies, use expo-secure-store in the client side
   //   // res.clearCookie("accessToken", {
@@ -95,16 +100,17 @@ export class LoginController {
     })
 
     if (user) {
-      // 400: Bad request
+      // NOTE: 400: Bad request
       res.status(400).json({error: "The email is used"})
       return
     }
 
+    const hashPassword = await hash(password, 10)
     const newUser = await this.prisma.user.create(
       {
         data: {
           email,
-          password: await hash(password, 10)
+          password: hashPassword
         }
       }
     )
@@ -121,7 +127,10 @@ export class LoginController {
     }
 
     const user = await this.prisma.user.findUnique({
-      where: {email}
+      where: {
+        email,
+        isDeleted: false
+      }
     })
 
     if (!user) {
@@ -188,7 +197,7 @@ export class LoginController {
     })
 
     if (!tokenRecord || !tokenRecord.token) {
-      // 401: Unauthorized
+      // NOTE: 401: Unauthorized
       res.status(401).json({ error: "Invalid or expired token" });
       return
     }
@@ -209,7 +218,6 @@ export class LoginController {
 
   googleLogin = async (req: Request, res: Response) => {
     const {token} = req.body
-    // console.log(req.body)
 
     if (!token) {
       // 400: Bad request
@@ -242,7 +250,14 @@ export class LoginController {
       })
 
       if (checkGoogleUserExist) {
-        const jwt = sign(checkGoogleUserExist, process.env.JWT_SECRET)
+        if (checkGoogleUserExist.isDeleted) {
+          res.status(400).json({error: "This google account has been deactivated for this app. Please try again later"})
+          return
+        }
+
+        const {password, ...userPayload} = checkGoogleUserExist
+        const jwt = sign(userPayload, process.env.JWT_SECRET)
+        
         res.json({user: checkGoogleUserExist, token: jwt})
         return
       }
@@ -282,7 +297,13 @@ export class LoginController {
         }
       })
 
-      const jwt = sign(user, process.env.JWT_SECRET)
+      if (user.isDeleted) {
+        res.status(400).json({error: "This user is deactivated"})
+        return
+      }
+      
+      const {password, ...userPayload} = checkGoogleUserExist
+      const jwt = sign(userPayload, process.env.JWT_SECRET)
       
       res.json({user, token: jwt})
     } catch (e) {

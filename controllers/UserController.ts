@@ -1,4 +1,5 @@
 import {PrismaClient} from "@prisma/client";
+import {hash} from "bcryptjs";
 import {Request, Response} from "express"
 import {validate} from "uuid"
 
@@ -23,12 +24,20 @@ export class UserController {
     })
 
     if (!user) {
-      // 404: can't find the resources/data
+      // NOTE: 404: can't find the resources/data
       res.status(404).json({error: "There is no this user profile"})
       return
     }
 
-    res.json(user)
+    if (user.isDeleted) {
+      res.status(400).json({error: "This user is deactivated"})
+      return
+    }
+
+    // omit security credential (password)
+    const {password, ...userInfo} = user
+
+    res.json(userInfo)
   }
 
   updateUserInformation = async (req: Request, res: Response) => {
@@ -53,6 +62,87 @@ export class UserController {
       data: req.body
     })
 
-    res.json(user)
+    const {password, ...userInfo} = user
+
+    res.json(userInfo)
+  }
+
+  checkUser = async (req: Request, res: Response) => {
+    const {id: userId} = req.params
+    const {email} = req.body
+    console.log(userId, email)
+
+    if (!userId) {
+      res.status(400).json({error: "There is no user id"})
+      return
+    }
+
+    if (!validate(userId)) {
+      res.status(400).json({error: "Invalid user id format. It should be uuid"})
+      return
+    }
+
+    if (!email) {
+      res.status(400).json({error: "email is missing"})
+      return
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { email }
+    })
+
+    if (!user) {
+      res.status(401).json({error: "There is no this user"})
+      return
+    }
+
+    if (user.isDeleted) {
+      res.status(400).json({error: "This user is deactivated"})
+      return
+    }
+
+    res.json({message: "User exists"})
+  }
+
+  changePassword = async (req: Request, res: Response) => {
+    const {id} = req.params
+    const {newPassword} = req.body
+
+    if (!id) {
+      res.status(400).json({error: "There is no user id"})
+      return
+    }
+
+    if (!validate(id)) {
+      res.status(400).json({error: "Invalid user id format. It should be uuid"})
+      return
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: {id}
+    })
+
+    if (!user) {
+      res.status(401).json({error: "There is no this user"})
+      return
+    }
+
+    if (user.isDeleted) {
+      res.status(400).json({error: "This user is deactivated"})
+      return
+    }
+
+    if (!newPassword) {
+      res.status(400).json({error: "There is no password for update"})
+      return
+    }
+
+    const hashPassword = await hash(newPassword, 10)
+    await this.prisma.user.update({
+      where: {id},
+      data: { password: hashPassword }
+    })
+
+    res.json({message: "password update success"})
   }
 }

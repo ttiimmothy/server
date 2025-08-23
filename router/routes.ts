@@ -37,3 +37,5 @@ routes.post("/users/login/google", loginController.googleLogin)
 
 routes.get("/users/info/user/:id", authMiddleware.verifyJsonWebToken, userController.getUserInformation)
 routes.post("/users/info/user/:id", authMiddleware.verifyJsonWebToken, userController.updateUserInformation)
+routes.post("/users/check/user/:id", authMiddleware.verifyJsonWebToken, userController.checkUser)
+routes.post("/users/change/password/user/:id", authMiddleware.verifyJsonWebToken, userController.changePassword)

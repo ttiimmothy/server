@@ -29,7 +29,7 @@ export class LoginController {
       }
 
       if (!user.password) {
-        res.status(401).json({ 
+        res.status(400).json({ 
           error: "This account is registered via Google login. Please login with Google." 
         });
         return;
@@ -38,7 +38,7 @@ export class LoginController {
       const match = await compare(password, user.password)
       
       if (!match) {
-        res.status(401).json({error: "Invalid credentials"})
+        res.status(400).json({error: "Invalid credentials"})
         return
       }
 
@@ -59,6 +59,7 @@ export class LoginController {
       res.json({user: userPayload, token})
     } catch (e) {
       console.error(e);
+      // 500: Internal server error
       res.status(500).json({ error: "Internal server error" });
     }
   }
@@ -94,7 +95,8 @@ export class LoginController {
     })
 
     if (user) {
-      res.status(404).json({error: "The email is used"})
+      // 400: Bad request
+      res.status(400).json({error: "The email is used"})
       return
     }
 
@@ -123,6 +125,7 @@ export class LoginController {
     })
 
     if (!user) {
+      // 404: Not found, resources don't exist
       res.status(404).json({error: "this email hasn't been registered"})
       return
     }
@@ -185,6 +188,7 @@ export class LoginController {
     })
 
     if (!tokenRecord || !tokenRecord.token) {
+      // 401: Unauthorized
       res.status(401).json({ error: "Invalid or expired token" });
       return
     }
@@ -208,6 +212,7 @@ export class LoginController {
     // console.log(req.body)
 
     if (!token) {
+      // 400: Bad request
       res.status(400).json({error: "id token is missing"})
       return
     }
@@ -225,6 +230,7 @@ export class LoginController {
       const payload = ticket.getPayload()
 
       if (!payload) {
+        // 401: Unauthorized
         res.status(401).json({error: "Can't google login"})
         return
       }

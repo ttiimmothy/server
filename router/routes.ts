@@ -6,6 +6,7 @@ import {DocumentController} from "@/controllers/DocumentController";
 import {ServiceProviderController} from "@/controllers/ServiceProviderController";
 import {LoginController} from "@/controllers/LoginController";
 import {AuthMiddleware} from "@/middleware/AuthMiddleware";
+import {UserController} from "@/controllers/UserController";
 
 const prisma = new PrismaClient();
 const categoryController = new CategoryController(prisma);
@@ -13,6 +14,7 @@ const checklistController = new ChecklistController(prisma)
 const documentController = new DocumentController(prisma)
 const serviceProviderController = new ServiceProviderController(prisma);
 const loginController = new LoginController(prisma)
+const userController = new UserController(prisma)
 
 const authMiddleware = new AuthMiddleware()
 
@@ -32,3 +34,6 @@ routes.post("/users/register", loginController.register)
 routes.post("/users/forget/password", loginController.forgetPassword)
 routes.post("/users/reset/password", loginController.resetPassword)
 routes.post("/users/login/google", loginController.googleLogin)
+
+routes.get("/users/info/user/:id", authMiddleware.verifyJsonWebToken, userController.getUserInformation)
+routes.post("/users/info/user/:id", authMiddleware.verifyJsonWebToken, userController.updateUserInformation)

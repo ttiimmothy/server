@@ -4,6 +4,7 @@ import {verify} from "jsonwebtoken"
 
 export class AuthMiddleware {
   verifyJsonWebToken = async (req: Request & {user: Omit<User, "password">}, res: Response, next: NextFunction) => {
+    // if I use cookies, but cookies can't delete in the expo app when logout becuase it isn't website
     // const token = req.cookies.accessToken
     // if (!token) {
     //   res.status(401).json({error: "Unauthorized"})
@@ -21,6 +22,7 @@ export class AuthMiddleware {
       req.user = payload
       next()
     } catch (e) {
+      // 401: Unauthorized
       res.status(401).json({error: "Invalid token"})
     }
   }

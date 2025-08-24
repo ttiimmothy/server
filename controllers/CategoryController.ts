@@ -16,8 +16,8 @@ export class CategoryController {
     res.json(categories)
   }
 
-  checkCategoryExist = async(req: Request, res: Response) => {
-    const categoryId = req.body.categoryId
+  checkCategory = async(req: Request, res: Response) => {
+    const {id: categoryId} = req.params
     const category = await this.prisma.category.findUnique({
       where: {
         id: categoryId

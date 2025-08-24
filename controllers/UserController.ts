@@ -55,6 +55,7 @@ export class UserController {
 
     if (!req.body) {
       res.status(400).json({error: "There is no user information for update"})
+      return
     }
 
     const user = await this.prisma.user.update({
@@ -91,7 +92,7 @@ export class UserController {
     })
 
     if (!user) {
-      res.status(401).json({error: "There is no this user"})
+      res.status(404).json({error: "There is no this user"})
       return
     }
 
@@ -122,7 +123,7 @@ export class UserController {
     })
 
     if (!user) {
-      res.status(401).json({error: "There is no this user"})
+      res.status(404).json({error: "There is no this user"})
       return
     }
 
@@ -143,5 +144,18 @@ export class UserController {
     })
 
     res.json({message: "password update success"})
+  }
+
+  deleteUser = async (req: Request, res: Response) => {
+    const {id} = req.params
+    await this.prisma.user.update({
+      where: {id},
+      data: {
+        isDeleted: true,
+        accountStatus: {isActive: false},
+        deletedAt: new Date()
+      }
+    })
+    res.json({message: "The user is deactivated"})
   }
 }

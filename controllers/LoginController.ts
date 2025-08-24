@@ -36,7 +36,7 @@ export class LoginController {
       }
 
       if (user.isDeleted) {
-        res.status(400).json({error: "This user is deactivated"})
+        res.json({message: "This user is deactivated"})
         return
       }
 
@@ -181,7 +181,7 @@ export class LoginController {
     const {token, newPassword} = req.body
 
     if (!token) {
-      res.status(400).json({error: "Unauthorized"})
+      res.status(401).json({error: "Unauthorized"})
       return
     }
 
@@ -251,7 +251,7 @@ export class LoginController {
 
       if (checkGoogleUserExist) {
         if (checkGoogleUserExist.isDeleted) {
-          res.status(400).json({error: "This google account has been deactivated for this app. Please try again later"})
+          res.json({message: "This google account has been deactivated for this app. Please try again later"})
           return
         }
 
@@ -301,11 +301,15 @@ export class LoginController {
         res.status(400).json({error: "This user is deactivated"})
         return
       }
-      
-      const {password, ...userPayload} = checkGoogleUserExist
-      const jwt = sign(userPayload, process.env.JWT_SECRET)
-      
-      res.json({user, token: jwt})
+
+      if (user.password) {
+        const {password, ...userPayload} = checkGoogleUserExist
+        const jwt = sign(userPayload, process.env.JWT_SECRET)
+        res.json({user: userPayload, token: jwt})
+      } else {
+        const jwt = sign(user, process.env.JWT_SECRET)
+        res.json({user, token: jwt})
+      }
     } catch (e) {
       console.error(e);
       res.status(401).json({ error: "Invalid token" });

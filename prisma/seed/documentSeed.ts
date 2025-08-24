@@ -11,7 +11,7 @@ const document = async () => {
 
   const category = await prisma.category.findUnique({
     where: {
-      name: "Digital legacy"
+      name: "Funeral and memorial"
     }
   })
 

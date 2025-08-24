@@ -5,7 +5,7 @@ export class ChecklistController {
   constructor(public prisma:PrismaClient) {}
 
   getChecklistByCategoryId = async(req: Request, res: Response) => {
-    const categoryId = req.body.categoryId;
+    const {categoryId} = req.body;
     if (!categoryId) {
       res.status(400).json({error: "There is no category id"})
       return

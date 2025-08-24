@@ -35,7 +35,7 @@ routes.get("/serviceprovider/favorite/:userId/:serviceProviderId", serviceProvid
 
 routes.post("/users/login", loginController.login)
 routes.get("/users/current/user", authMiddleware.verifyJsonWebToken, loginController.currentUser)
-routes.get("/users/logout", loginController.currentUser)
+// routes.get("/users/logout", loginController.currentUser)
 routes.post("/users/register", loginController.register)
 routes.post("/users/forget/password", loginController.forgetPassword)
 routes.post("/users/reset/password", loginController.resetPassword)

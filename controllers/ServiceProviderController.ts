@@ -18,7 +18,6 @@ export class ServiceProviderController {
 
   updateUserFavoriteServiceProvider = async (req: Request, res: Response) => {
     const {userId, serviceProviderId, isFavorite} = req.body
-    console.log(req.body)
     const userFavoriteServiceProvider = await this.prisma.favoriteServiceProvider.findFirst({
       where: {
         userId, serviceProviderId

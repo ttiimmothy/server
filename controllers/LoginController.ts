@@ -255,10 +255,16 @@ export class LoginController {
           return
         }
 
-        const {password, ...userPayload} = checkGoogleUserExist
-        const jwt = sign(userPayload, process.env.JWT_SECRET)
-        
-        res.json({user: checkGoogleUserExist, token: jwt})
+        // NOTE: check password, if password is undefined, it can't be extract from the object
+        if (checkGoogleUserExist.password) {
+          const {password, ...userPayload} = checkGoogleUserExist
+          const jwt = sign(userPayload, process.env.JWT_SECRET)
+          
+          res.json({user: userPayload, token: jwt})
+        } else {
+          const jwt = sign(checkGoogleUserExist, process.env.JWT_SECRET)
+          res.json({user: checkGoogleUserExist, token: jwt})
+        }
         return
       }
 
@@ -302,14 +308,20 @@ export class LoginController {
         return
       }
 
-      if (user.password) {
-        const {password, ...userPayload} = checkGoogleUserExist
-        const jwt = sign(userPayload, process.env.JWT_SECRET)
-        res.json({user: userPayload, token: jwt})
-      } else {
-        const jwt = sign(user, process.env.JWT_SECRET)
-        res.json({user, token: jwt})
-      }
+      // NOTE: user must have password because this user is registered by classic method, and not login by google before
+      // don't need to check user.pasword exist
+      // if (user.password) {
+      //   const {password, ...userPayload} = checkGoogleUserExist
+      //   const jwt = sign(userPayload, process.env.JWT_SECRET)
+      //   res.json({user: userPayload, token: jwt})
+      // } else {
+      //   const jwt = sign(user, process.env.JWT_SECRET)
+      //   res.json({user, token: jwt})
+      // }
+
+      const {password, ...userPayload} = checkGoogleUserExist
+      const jwt = sign(userPayload, process.env.JWT_SECRET)
+      res.json({user: userPayload, token: jwt})
     } catch (e) {
       console.error(e);
       res.status(401).json({ error: "Invalid token" });

@@ -102,6 +102,7 @@ model ServiceProvider {
 }
 
 model FavoriteServiceProvider {
+  id Int @id @default(autoincrement())
   isDeleted Boolean @default(false) @map("is_deleted")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -112,7 +113,7 @@ model FavoriteServiceProvider {
   userId String @db.Uuid @map("user_id")
   serviceProviderId String @db.Uuid @map("service_provider_id")
 
-  @@id([userId,serviceProviderId]) // Composite primary key
+  // @@id([userId,serviceProviderId]) // Composite primary key
   @@map("favoriteserviceproviders")
 }
 

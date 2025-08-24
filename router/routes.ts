@@ -22,7 +22,9 @@ export const routes = Router();
 routes.get("/categories", categoryController.getCategories);
 routes.post("/category", categoryController.checkCategoryExist);
 routes.post("/checklists", checklistController.getChecklistByCategoryId)
-routes.post("/checklists/search", checklistController.searchCategoryAndChecklist)
+routes.post("/checklists/category/:categoryId", checklistController.updateChecklistCompletedState)
+// routes.post("/checklists/search", checklistController.searchCategoryAndChecklist)
+
 routes.post("/documents", authMiddleware.verifyJsonWebToken, documentController.getDocuments)
 
 routes.get("/serviceproviders", serviceProviderController.getServiceProviders)

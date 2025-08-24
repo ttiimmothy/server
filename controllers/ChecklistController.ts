@@ -75,4 +75,41 @@ export class ChecklistController {
 
     res.json(searchResult)
   }
+
+  updateChecklistCompletedState = async (req:Request, res: Response) => {
+    const { categoryId } = req.params
+    const { itemId, isCompleted } = req.body
+
+    if (!categoryId) {
+      res.status(400).json({error: "category id is missing"})
+      return
+    }
+
+    if (!itemId || isCompleted === undefined) {
+      res.status(400).json({error: "There is no checklist id or isCompleted status for update"})
+      return
+    }
+
+    const checklistFound = await this.prisma.checklist.findMany({
+      where: {
+        id: itemId,
+        categoryId
+      }
+    })
+
+    if (!checklistFound) {
+      res.status(401).json({error: "There is no this checklist"})
+      return
+    }
+
+    await this.prisma.checklist.update({
+      where: {
+        id: itemId,
+        categoryId
+      },
+      data: { isCompleted }
+    })
+
+    res.json({message: "The checklist complete status update success"})
+  }
 }

@@ -70,7 +70,6 @@ export class UserController {
   checkUser = async (req: Request, res: Response) => {
     const {id: userId} = req.params
     const {email} = req.body
-    console.log(userId, email)
 
     if (!userId) {
       res.status(400).json({error: "There is no user id"})

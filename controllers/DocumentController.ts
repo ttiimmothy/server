@@ -40,10 +40,13 @@ export class DocumentController {
       }
     })
 
+    let result;
     if (searchTerm) {
-      documents.filter(document => document.name.includes(searchTerm))
+      result = documents.filter(document => {
+        return ( document.name.toLowerCase().includes(searchTerm.toLowerCase()) )
+      })
     }
 
-    res.json(documents)
+    res.json(result ? result : documents)
   }
 }

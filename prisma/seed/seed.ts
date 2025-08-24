@@ -129,8 +129,7 @@ const seed = async () => {
       data: {
         name: "Create a list of online accounts",
         categoryId: funeralAndMemorial.id,
-        itemOrder: 1,
-        userId: user.id
+        itemOrder: 1
       }
     })
   }

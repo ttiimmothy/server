@@ -21,14 +21,15 @@ const authMiddleware = new AuthMiddleware()
 export const routes = Router();
 routes.get("/categories", categoryController.getCategories);
 routes.get("/category/:id", categoryController.checkCategory);
+
 routes.post("/checklists", checklistController.getChecklistByCategoryId)
-routes.post("/checklists/category/:categoryId", checklistController.updateChecklistCompletedState)
+routes.put("/checklists/category/:categoryId",  authMiddleware.verifyJsonWebToken, checklistController.updateChecklistCompletedState)
 // routes.post("/checklists/search", checklistController.searchCategoryAndChecklist)
 
 routes.post("/documents", authMiddleware.verifyJsonWebToken, documentController.getDocuments)
 
 routes.get("/serviceproviders", serviceProviderController.getServiceProviders)
-routes.post("/serviceproviders/favorite", authMiddleware.verifyJsonWebToken, serviceProviderController.updateUserFavoriteServiceProvider)
+routes.put("/serviceproviders/favorite", authMiddleware.verifyJsonWebToken, serviceProviderController.updateUserFavoriteServiceProvider)
 routes.get("/serviceprovider/:id", serviceProviderController.checkServiceProvider)
 routes.get("/serviceprovider/favorite/:userId/:serviceProviderId", serviceProviderController.checkFavoriteServiceProvider)
 
@@ -41,8 +42,9 @@ routes.post("/users/reset/password", loginController.resetPassword)
 routes.post("/users/login/google", loginController.googleLogin)
 
 routes.get("/users/info/user/:id", authMiddleware.verifyJsonWebToken, userController.getUserInformation)
-routes.post("/users/info/user/:id", authMiddleware.verifyJsonWebToken, userController.updateUserInformation)
+routes.put("/users/info/user/:id", authMiddleware.verifyJsonWebToken, userController.updateUserInformation)
+// check user exist for deleting that user account
 routes.post("/users/check/user/:id", authMiddleware.verifyJsonWebToken, userController.checkUser)
-routes.post("/users/change/password/user/:id", authMiddleware.verifyJsonWebToken, userController.changePassword)
+routes.put("/users/change/password/user/:id", authMiddleware.verifyJsonWebToken, userController.changePassword)
 
 routes.delete("/user/:id", userController.deleteUser)

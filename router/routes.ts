@@ -7,6 +7,7 @@ import {ServiceProviderController} from "@/controllers/ServiceProviderController
 import {LoginController} from "@/controllers/LoginController";
 import {AuthMiddleware} from "@/middleware/AuthMiddleware";
 import {UserController} from "@/controllers/UserController";
+import {MembershipController} from "@/controllers/MembershipController";
 
 const prisma = new PrismaClient();
 const categoryController = new CategoryController(prisma);
@@ -15,6 +16,7 @@ const documentController = new DocumentController(prisma)
 const serviceProviderController = new ServiceProviderController(prisma);
 const loginController = new LoginController(prisma)
 const userController = new UserController(prisma)
+const membershipController = new MembershipController(prisma)
 
 const authMiddleware = new AuthMiddleware()
 
@@ -48,3 +50,6 @@ routes.post("/users/check/user/:id", authMiddleware.verifyJsonWebToken, userCont
 routes.put("/users/change/password/user/:id", authMiddleware.verifyJsonWebToken, userController.changePassword)
 
 routes.delete("/user/:id", userController.deleteUser)
+
+routes.get("/memberships/user/:id", authMiddleware.verifyJsonWebToken, membershipController.getMembership)
+routes.put("/memberships/user/:id", authMiddleware.verifyJsonWebToken, membershipController.updateMembership)

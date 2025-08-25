@@ -30,8 +30,7 @@ model User {
   updatedAt DateTime @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
-  subscription Subscription? @relation(fields: [subscriptionId],references: [id])
-  subscriptionId String? @db.Uuid @map("subscription_id")
+  subscription Subscription?
 
   completions UserCompleteChecklist[]
   documents Document[]
@@ -170,11 +169,14 @@ model Document {
 model Subscription {
   id String @id @default(uuid()) @db.Uuid
   plan String @db.VarChar(255)
-  status Boolean @default(true)
+  status String @db.VarChar(255)
+  activeStatus Boolean? @map("active_status")
   startDate DateTime @map("start_date")
   endDate DateTime? @map("end_date")
+  createdAt DateTime @default(now()) @map("created_at")
 
-  users User[]
+  subscription User? @relation(fields: [userId],references: [id])
+  userId String? @db.Uuid @unique @map("user_id")
 
   @@map("subscriptions")
 }

@@ -4,10 +4,11 @@ import {routes} from "@/router/routes";
 import cookieParser from "cookie-parser";
 import {config} from "dotenv";
 import {deletePasswordResetToken} from "@/utils/deletePasswordResetToken";
+import Stripe from "stripe";
 
 config()
-
 const app = express();
+export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
 // NOTE: only require for form submission, parses URL-encoded bodies <form method="POST" action="/submit"></form>
 app.use(urlencoded({extended: true}))

@@ -7,7 +7,6 @@ export class ChecklistController {
 
   getChecklistByCategoryId = async(req: Request, res: Response) => {
     const {userId, categoryId} = req.body;
-    console.log(userId)
     if (!categoryId) {
       res.status(400).json({error: "There is no category id"})
       return

@@ -54,4 +54,4 @@ routes.delete("/user/:id", userController.deleteUser)
 
 routes.get("/memberships/user/:id", authMiddleware.verifyJsonWebToken, membershipController.getMembership)
 routes.put("/memberships/user/:id", authMiddleware.verifyJsonWebToken, membershipController.updateMembership)
-routes.put("/memberships/user/:id", authMiddleware.verifyJsonWebToken, membershipController.getCustomerId)
+routes.post("/memberships/stripe/setupintent/:id", authMiddleware.verifyJsonWebToken, membershipController.getCustomerAndSetupIntent)

@@ -1,4 +1,4 @@
-import express,{urlencoded, json} from "express";
+import express,{urlencoded, json, text} from "express";
 import cors from "cors";
 import {routes} from "@/router/routes";
 import cookieParser from "cookie-parser";
@@ -9,12 +9,14 @@ config()
 
 const app = express();
 
-// only require for form submission, parses URL-encoded bodies <form method="POST" action="/submit"></form>
+// NOTE: only require for form submission, parses URL-encoded bodies <form method="POST" action="/submit"></form>
 app.use(urlencoded({extended: true}))
-// require for json
+// NOTE: require for json
 app.use(json());
-// use cookie
-app.use(cookieParser())
+// NOTE: require for raw string, {"Content-Type":"text/plain"}
+app.use(text());
+// NOTE: use cookie, now not use because cookie can't delete properly for the app
+// app.use(cookieParser())
 
 app.use(cors({
   origin: ["http://localhost:8084"],
@@ -28,6 +30,6 @@ setInterval(() => {
   deletePasswordResetToken()
 }, 1000 * 60 * 60);
 
-app.listen("8080", () => {
-  console.log("listening http://localhost:8080")
+app.listen(8080, "0.0.0.0", () => {
+  console.log("listening http://0.0.0.0:8080")
 })

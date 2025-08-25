@@ -13,8 +13,7 @@ const checklist = async () => {
         data: {
           name: "Confirm and Certify Death",
           categoryId: category.id,
-          itemOrder: 1,
-          userId: user.id
+          itemOrder: 1
         }
       })
       console.log(confirm)
@@ -26,8 +25,7 @@ const checklist = async () => {
         data: {
           name: "Register the Death",
           categoryId: category.id,
-          itemOrder: 2,
-          userId: user.id
+          itemOrder: 2
         }
       })
     }
@@ -39,7 +37,7 @@ const checklist = async () => {
           name: "Funeral Arrangements",
           categoryId: category.id,
           itemOrder: 3,
-          userId: user.id
+          
         }
       })
     }
@@ -50,7 +48,7 @@ const checklist = async () => {
           name: "Notify Family and Friends",
           categoryId: category.id,
           itemOrder: 4,
-          userId: user.id
+          
         }
       })
     }
@@ -62,7 +60,7 @@ const checklist = async () => {
           name: "Consider Organ and Tissue Donation",
           categoryId: category.id,
           itemOrder: 5,
-          userId: user.id
+          
         }
       })
     }
@@ -74,7 +72,7 @@ const checklist = async () => {
           name: "Identify the Legal Representative",
           categoryId: category.id,
           itemOrder: 6,
-          userId: user.id
+          
         }
       })
     }
@@ -86,7 +84,7 @@ const checklist = async () => {
           name: "Consult with Legal and Financial Professionals",
           categoryId: category.id,
           itemOrder: 7,
-          userId: user.id
+          
         }
       })
     }
@@ -97,7 +95,7 @@ const checklist = async () => {
           name: "Understand the Division of Property",
           categoryId: category.id,
           itemOrder: 8,
-          userId: user.id
+          
         }
       })
     }
@@ -108,7 +106,7 @@ const checklist = async () => {
           name: "Claim Ennamements",
           categoryId: category.id,
           itemOrder: 9,
-          userId: user.id
+          
         }
       })
     }
@@ -119,7 +117,7 @@ const checklist = async () => {
           name: "Notify Government Agencies",
           categoryId: category.id,
           itemOrder: 10,
-          userId: user.id
+          
         }
       })
     }
@@ -131,7 +129,7 @@ const checklist = async () => {
           name: "Close Accounts and Subscriptions",
           categoryId: category.id,
           itemOrder: 11,
-          userId: user.id
+          
         }
       })
     }
@@ -143,7 +141,7 @@ const checklist = async () => {
           name: "Obtain Death Certificates",
           categoryId: category.id,
           itemOrder: 12,
-          userId: user.id
+          
         }
       })
     }
@@ -155,7 +153,7 @@ const checklist = async () => {
           name: "Manage Finances",
           categoryId: category.id,
           itemOrder: 13,
-          userId: user.id
+          
         }
       })
     }
@@ -167,7 +165,7 @@ const checklist = async () => {
           name: "Deal with Real Estate",
           categoryId: category.id,
           itemOrder: 14,
-          userId: user.id
+          
         }
       })
     }
@@ -179,7 +177,7 @@ const checklist = async () => {
           name: "Protect Against Fraud",
           categoryId: category.id,
           itemOrder: 15,
-          userId: user.id
+          
         }
       })
     }
@@ -191,7 +189,7 @@ const checklist = async () => {
           name: "Return Documents",
           categoryId: category.id,
           itemOrder: 16,
-          userId: user.id
+          
         }
       })
     }
@@ -203,7 +201,7 @@ const checklist = async () => {
           name: "Coping with Grief",
           categoryId: category.id,
           itemOrder: 17,
-          userId: user.id
+          
         }
       })
     }

@@ -1,10 +1,11 @@
 import {PrismaClient, User} from "@prisma/client";
 import {Request, Response} from "express"
 import {compare, hash} from "bcryptjs";
-import {sign} from "jsonwebtoken";
+import { sign, verify } from 'jsonwebtoken';
 import {createTransport} from "nodemailer";
 // node built-in crypto, haven't installed in the dependencies
 import {randomBytes} from "crypto";
+import {OAuth2Client} from "google-auth-library";
 
 export class LoginController {
   constructor(public prisma: PrismaClient) {}
@@ -13,7 +14,6 @@ export class LoginController {
     try {
       const {email, password} = req.body
 
-      console.log("aa")
       if (!email || !password) {
         res.status(400).json({error: "email or password is missing"})
         return
@@ -28,14 +28,26 @@ export class LoginController {
         return
       }
 
-      const match = await compare(password, user.password)
-      
-      if (!match) {
-        res.status(401).json({error: "Invalid credentials"})
+      if (!user.password) {
+        res.status(400).json({ 
+          error: "This account is registered via Google login. Please login with Google." 
+        });
+        return;
+      }
+
+      if (user.isDeleted) {
+        res.json({message: "This user is deactivated"})
         return
       }
 
-      const {password: _pwd, ...userPayload} = user
+      const match = await compare(password, user.password)
+      
+      if (!match) {
+        res.status(400).json({error: "Invalid credentials"})
+        return
+      }
+
+      const {password: userPassword, ...userPayload} = user
 
       const token = sign(userPayload, process.env.JWT_SECRET, 
         // { expiresIn: "48h" }
@@ -52,17 +64,18 @@ export class LoginController {
       res.json({user: userPayload, token})
     } catch (e) {
       console.error(e);
+      // 500: Internal server error
       res.status(500).json({ error: "Internal server error" });
     }
   }
 
   currentUser = async (req: Request & {user: Omit<User, "password">}, res: Response) => {
     const user = req.user
-
     res.json(user)
   }
 
-  // logout now can delete token in the expo-secure-store by deleteItemAsync in client, not call the logout api
+  // NOTE: logout now can delete token in the expo-secure-store by deleteItemAsync in client, not call the logout api
+  //
   // logout = async (req: Request, res: Response) => {
   //   // not use cookies, use expo-secure-store in the client side
   //   // res.clearCookie("accessToken", {
@@ -87,15 +100,17 @@ export class LoginController {
     })
 
     if (user) {
-      res.status(404).json({error: "The email is used"})
+      // NOTE: 400: Bad request
+      res.status(400).json({error: "The email is used"})
       return
     }
 
+    const hashPassword = await hash(password, 10)
     const newUser = await this.prisma.user.create(
       {
         data: {
           email,
-          password: await hash(password, 10)
+          password: hashPassword
         }
       }
     )
@@ -112,10 +127,14 @@ export class LoginController {
     }
 
     const user = await this.prisma.user.findUnique({
-      where: {email}
+      where: {
+        email,
+        isDeleted: false
+      }
     })
 
     if (!user) {
+      // 404: Not found, resources don't exist
       res.status(404).json({error: "this email hasn't been registered"})
       return
     }
@@ -162,7 +181,7 @@ export class LoginController {
     const {token, newPassword} = req.body
 
     if (!token) {
-      res.status(400).json({error: "Unauthorized"})
+      res.status(401).json({error: "Unauthorized"})
       return
     }
 
@@ -178,6 +197,7 @@ export class LoginController {
     })
 
     if (!tokenRecord || !tokenRecord.token) {
+      // NOTE: 401: Unauthorized
       res.status(401).json({ error: "Invalid or expired token" });
       return
     }
@@ -192,5 +212,119 @@ export class LoginController {
     })
 
     res.json({message: "Password reset successful"})
+  }
+
+  googleClient = new OAuth2Client(process.env.GOOGLE_WEB_CLIENT_ID)
+
+  googleLogin = async (req: Request, res: Response) => {
+    const {token} = req.body
+
+    if (!token) {
+      // 400: Bad request
+      res.status(400).json({error: "id token is missing"})
+      return
+    }
+
+    try {
+      const ticket = await this.googleClient.verifyIdToken({
+        idToken: token,
+        // audience: process.env.GOOGLE_WEB_CLIENT_ID
+        audience: [
+          process.env.GOOGLE_IOS_CLIENT_ID,
+          process.env.GOOGLE_ANDROID_CLIENT_ID
+        ], // accept both platforms
+      })
+
+      const payload = ticket.getPayload()
+
+      if (!payload) {
+        // 401: Unauthorized
+        res.status(401).json({error: "Can't google login"})
+        return
+      }
+
+      const checkGoogleUserExist = await this.prisma.user.findUnique({
+        where: {
+          googleSub: payload.sub
+        }
+      })
+
+      if (checkGoogleUserExist) {
+        if (checkGoogleUserExist.isDeleted) {
+          res.json({message: "This google account has been deactivated for this app. Please try again later"})
+          return
+        }
+
+        // NOTE: check password, if password is undefined, it can't be extract from the object
+        if (checkGoogleUserExist.password) {
+          const {password, ...userPayload} = checkGoogleUserExist
+          const jwt = sign(userPayload, process.env.JWT_SECRET)
+          
+          res.json({user: userPayload, token: jwt})
+        } else {
+          const jwt = sign(checkGoogleUserExist, process.env.JWT_SECRET)
+          res.json({user: checkGoogleUserExist, token: jwt})
+        }
+        return
+      }
+
+      const checkUserExist = await this.prisma.user.findUnique({
+        where: {
+          email: payload.email
+        }
+      })
+
+      if (!checkUserExist) {
+        const newUser = await this.prisma.user.create({
+          data: {
+            email: payload.email,
+            displayName: payload.name,
+            photoURL: payload.picture,
+            bio: payload.profile,
+            googleSub: payload.sub // sub = subject
+          }
+        })
+
+        const jwtForNewUser = sign(newUser, process.env.JWT_SECRET)
+
+        res.json({user: newUser, token: jwtForNewUser})
+        return
+      }
+
+      const {id, displayName, photoURL, bio} = checkUserExist
+
+      const user = await this.prisma.user.update({
+        where: { id },
+        data: {
+          displayName: displayName ? displayName : payload.name,
+          photoURL: photoURL ? photoURL : payload.picture,
+          bio: bio ? bio : payload.profile,
+          googleSub: payload.sub
+        }
+      })
+
+      if (user.isDeleted) {
+        res.status(400).json({error: "This user is deactivated"})
+        return
+      }
+
+      // NOTE: user must have password because this user is registered by classic method, and not login by google before
+      // don't need to check user.pasword exist
+      // if (user.password) {
+      //   const {password, ...userPayload} = checkGoogleUserExist
+      //   const jwt = sign(userPayload, process.env.JWT_SECRET)
+      //   res.json({user: userPayload, token: jwt})
+      // } else {
+      //   const jwt = sign(user, process.env.JWT_SECRET)
+      //   res.json({user, token: jwt})
+      // }
+
+      const {password, ...userPayload} = checkGoogleUserExist
+      const jwt = sign(userPayload, process.env.JWT_SECRET)
+      res.json({user: userPayload, token: jwt})
+    } catch (e) {
+      console.error(e);
+      res.status(401).json({ error: "Invalid token" });
+    }
   }
 }

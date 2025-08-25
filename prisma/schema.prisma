@@ -15,12 +15,13 @@ datasource db {
 
 model User {
   id String @id @default(uuid()) @db.Uuid
-  displayName String? @db.VarChar(255)
   email String @unique @db.VarChar(255)
+  password String?
+  displayName String? @db.VarChar(255)
   photoURL String? @map("photo_url")
   phoneNumber String? @db.VarChar(255) @map("phone_number")
   bio String?
-  password String
+  googleSub String? @unique @map("google_sub")
   notificationPreferences Json? @map("notification_preferences")
   accountStatus Json? @map("account_status")
   privacySettings Json? @map("privacy_settings")
@@ -29,10 +30,9 @@ model User {
   updatedAt DateTime @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
-  subscription Subscription? @relation(fields: [subscriptionId],references: [id])
-  subscriptionId String? @db.Uuid @map("subscription_id")
+  subscription Subscription?
 
-  checkListItems Checklist[]
+  completions UserCompleteChecklist[]
   documents Document[]
   favoriteServiceProviders FavoriteServiceProvider[]
 
@@ -60,18 +60,34 @@ model Checklist {
   id String @id @default(uuid()) @db.Uuid
   name String @db.VarChar(255)
   itemOrder Int @map("item_order")
-  user User @relation(fields:[userId], references: [id])
-  userId String @db.Uuid
-  isCompleted Boolean @default(false) @map("is_completed")
+
   isDeleted Boolean @default(false) @map("is_deleted")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
+  finializedAt DateTime? @map("finialized_at")
 
   category Category @relation(fields:[categoryId], references:[id])
   categoryId String @db.Uuid @map("category_id")
 
+  completions UserCompleteChecklist[]
+
   @@map("checklists")
+}
+
+model UserCompleteChecklist {
+  id Int @id @default(autoincrement())
+  isCompleted Boolean @default(false) @map("is_completed")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields:[userId], references: [id])
+  userId String @db.Uuid @map("user_id")
+
+  checklist Checklist @relation(fields: [checklistId], references: [id])
+  checklistId String @db.Uuid @map("checklist_id")
+
+  @@map("usercompletechecklists")
 }
 
 model ServiceProvider {
@@ -101,6 +117,7 @@ model ServiceProvider {
 }
 
 model FavoriteServiceProvider {
+  id Int @id @default(autoincrement())
   isDeleted Boolean @default(false) @map("is_deleted")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -111,7 +128,7 @@ model FavoriteServiceProvider {
   userId String @db.Uuid @map("user_id")
   serviceProviderId String @db.Uuid @map("service_provider_id")
 
-  @@id([userId,serviceProviderId]) // Composite primary key
+  // @@id([userId,serviceProviderId]) // Composite primary key
   @@map("favoriteserviceproviders")
 }
 
@@ -152,11 +169,14 @@ model Document {
 model Subscription {
   id String @id @default(uuid()) @db.Uuid
   plan String @db.VarChar(255)
-  status Boolean @default(true)
+  status String @db.VarChar(255)
+  activeStatus Boolean? @map("active_status")
   startDate DateTime @map("start_date")
   endDate DateTime? @map("end_date")
+  createdAt DateTime @default(now()) @map("created_at")
 
-  users User[]
+  subscription User? @relation(fields: [userId],references: [id])
+  userId String? @db.Uuid @unique @map("user_id")
 
   @@map("subscriptions")
 }

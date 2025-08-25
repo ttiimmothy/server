@@ -18,6 +18,28 @@ const seed = async () => {
     },
   })
 
+  await prisma.user.upsert({
+    where: { email: 'ttiimmothhylsff@gmail.com' },
+    update: {},
+    create: {
+      displayName: "Timothy",
+      email: "ttiimmothhylsff@gmail.com",
+      password: hashPassword,
+      isDeleted: true,
+      deletedAt: new Date()
+    },
+  })
+
+  await prisma.user.upsert({
+    where: { email: 'timothytimodanieliel@gmail.com' },
+    update: {},
+    create: {
+      displayName: "Timothy",
+      email: "timothytimodanieliel@gmail.com",
+      password: await hash("000",10)
+    },
+  })
+
   const funeralAndMemorial = await prisma.category.upsert({
     where: { name: "Funeral and memorial" },
     update: {},
@@ -107,8 +129,7 @@ const seed = async () => {
       data: {
         name: "Create a list of online accounts",
         categoryId: funeralAndMemorial.id,
-        itemOrder: 1,
-        userId: user.id
+        itemOrder: 1
       }
     })
   }
@@ -118,7 +139,7 @@ const seed = async () => {
     update: {},
     create: {
       name: "service provider",
-      categoryIds: [digitalLegacy.id],
+      categoryIds: [funeralAndMemorial.id],
       description: "description",
       latitude: 23.8,
       longitude: 129.3,

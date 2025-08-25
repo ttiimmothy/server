@@ -33,16 +33,20 @@ export class DocumentController {
         ...(tagsFilter
           ? { tags: { array_contains: tagsFilter } }
           : {}), // only add filter if tags exist
+        isDeleted: false
       },
       orderBy: {
         [sortBy]: sortDirection
       }
     })
 
+    let result;
     if (searchTerm) {
-      documents.filter(document => document.name.includes(searchTerm))
+      result = documents.filter(document => {
+        return ( document.name.toLowerCase().includes(searchTerm.toLowerCase()) )
+      })
     }
 
-    res.json(documents)
+    res.json(result ? result : documents)
   }
 }

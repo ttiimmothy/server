@@ -1,7 +1,7 @@
+import {uuidSchema} from "@/utils/zodSchema";
 import {PrismaClient} from "@prisma/client";
 import {hash} from "bcryptjs";
 import {Request, Response} from "express"
-import {validate} from "uuid"
 
 export class UserController {
   constructor (public prisma: PrismaClient) {}
@@ -14,7 +14,7 @@ export class UserController {
       return
     }
 
-    if (!validate(userId)) {
+    if (!uuidSchema.safeParse(userId)) {
       res.status(400).json({error: "Invalid user id format. It should be uuid"})
       return
     }
@@ -48,7 +48,7 @@ export class UserController {
       return
     }
 
-    if (!validate(userId)) {
+    if (!uuidSchema.safeParse(userId)) {
       res.status(400).json({error: "Invalid user id format. It should be uuid"})
       return
     }
@@ -77,7 +77,7 @@ export class UserController {
       return
     }
 
-    if (!validate(userId)) {
+    if (!uuidSchema.safeParse(userId)) {
       res.status(400).json({error: "Invalid user id format. It should be uuid"})
       return
     }
@@ -113,7 +113,7 @@ export class UserController {
       return
     }
 
-    if (!validate(id)) {
+    if (!uuidSchema.safeParse(id)) {
       res.status(400).json({error: "Invalid user id format. It should be uuid"})
       return
     }

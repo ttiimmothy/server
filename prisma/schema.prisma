@@ -25,13 +25,14 @@ model User {
   notificationPreferences Json? @map("notification_preferences")
   accountStatus Json? @map("account_status")
   privacySettings Json? @map("privacy_settings")
-  // customerid for recurring payment use
-  stripeCustomerId String? @map("stripe_customer_id")
+  // customerId for recurring payment use
+  stripeCustomerId String? @unique @map("stripe_customer_id")
   isDeleted Boolean @default(false) @map("is_deleted")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
 
+  // one-to-one relation, not every user must have subscription
   subscription Subscription?
 
   completions UserCompleteChecklist[]
@@ -67,7 +68,7 @@ model Checklist {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
-  finializedAt DateTime? @map("finialized_at")
+  finalizedAt DateTime? @map("finalized_at")
 
   category Category @relation(fields:[categoryId], references:[id])
   categoryId String @db.Uuid @map("category_id")
@@ -177,11 +178,12 @@ model Subscription {
   endDate DateTime? @map("end_date")
   createdAt DateTime @default(now()) @map("created_at")
 
+  // since subscriptionId update when the same user cancel and recreate subscription, to keep to one-to-one relation, need to update when the subscriptionId updates
   stripeSubscriptionId String @db.VarChar(255) @map("stripe_subscription_id")
   stripePriceId String @db.VarChar(255) @map("stripe_price_id")
 
-  subscription User? @relation(fields: [userId],references: [id])
-  userId String? @db.Uuid @unique @map("user_id")
+  user User @relation(fields: [userId],references: [id])
+  userId String @db.Uuid @unique @map("user_id")
 
   @@map("subscriptions")
 }

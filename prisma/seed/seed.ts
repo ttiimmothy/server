@@ -1,9 +1,10 @@
 import {PrismaClient} from "@prisma/client";
 import {hash} from "bcryptjs";
 import {config} from "dotenv";
+import {checklistSeed} from "./checklistSeed";
+import {documentSeed} from "./documentSeed";
 
 config()
-
 const prisma = new PrismaClient();
 
 const seed = async () => {
@@ -156,7 +157,9 @@ const seed = async () => {
     }
   })
 
-  console.log({ user, funeralAndMemorial, digitalLegacy, checklist })
+  console.log(user, funeralAndMemorial, digitalLegacy, checklist)
+  await checklistSeed()
+  await documentSeed()
 }
 
 seed();

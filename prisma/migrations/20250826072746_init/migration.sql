@@ -44,7 +44,7 @@ CREATE TABLE "public"."checklists" (
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
     "deleted_at" TIMESTAMP(3),
-    "finialized_at" TIMESTAMP(3),
+    "finalized_at" TIMESTAMP(3),
     "category_id" UUID NOT NULL,
 
     CONSTRAINT "checklists_pkey" PRIMARY KEY ("id")
@@ -138,6 +138,8 @@ CREATE TABLE "public"."subscriptions" (
     "start_date" TIMESTAMP(3) NOT NULL,
     "end_date" TIMESTAMP(3),
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "stripe_subscription_id" VARCHAR(255) NOT NULL,
+    "stripe_price_id" VARCHAR(255) NOT NULL,
     "user_id" UUID,
 
     CONSTRAINT "subscriptions_pkey" PRIMARY KEY ("id")
@@ -161,6 +163,9 @@ CREATE UNIQUE INDEX "users_email_key" ON "public"."users"("email");
 CREATE UNIQUE INDEX "users_google_sub_key" ON "public"."users"("google_sub");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "users_stripe_customer_id_key" ON "public"."users"("stripe_customer_id");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "categories_name_key" ON "public"."categories"("name");
 
 -- CreateIndex
@@ -168,6 +173,9 @@ CREATE UNIQUE INDEX "categories_item_order_key" ON "public"."categories"("item_o
 
 -- CreateIndex
 CREATE UNIQUE INDEX "serviceproviders_name_key" ON "public"."serviceproviders"("name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "subscriptions_stripe_subscription_id_key" ON "public"."subscriptions"("stripe_subscription_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "subscriptions_user_id_key" ON "public"."subscriptions"("user_id");

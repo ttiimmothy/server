@@ -1,6 +1,5 @@
 import {PrismaClient} from "@prisma/client";
 import {Request, Response} from "express";
-import {validate} from "uuid";
 
 export class ChecklistController {
   constructor(public prisma:PrismaClient) {}

@@ -2,6 +2,7 @@ import {PrismaClient, User} from "@prisma/client";
 import {Request, Response} from "express"
 import {stripe} from "@/..";
 import {planSchema} from "@/utils/zodSchema";
+import Stripe from "stripe";
 
 export class MembershipController {
   constructor (public prisma: PrismaClient) {}
@@ -47,9 +48,8 @@ export class MembershipController {
           }
         })
       }
-
       const setupIntent = await stripe.setupIntents.create({
-        customer: customer.id,
+        customer: customer.stripeCustomerId,
         payment_method_types: ["card"]
       })
       res.json({clientSecret: setupIntent.client_secret})
@@ -59,33 +59,73 @@ export class MembershipController {
   }
 
   stripeSubscribe = async (req: Request & {user:Omit<User, "password">}, res: Response) => {
-    const appUserId = req.user.id
-    const {planId} = req.body
-    const parseResult = planSchema.safeParse(planId)
-    if (!parseResult) {
-      res.status(400).json({error: "invalid planId"})
-      return
-    }
+    try {
+      const appUserId = req.user.id
+      const {planId} = req.body
+      const parseResult = planSchema.safeParse(planId)
+      if (!parseResult) {
+        res.status(400).json({error: "invalid planId"})
+        return
+      }
 
-    const customer = await this.prisma.user.findUnique({
-      where: {id: appUserId}
-    })
+      const customer = await this.prisma.user.findUnique({
+        where: {id: appUserId}
+      })
 
-    const priceIds = [
-      {plan_monthly: "price_1RzvtZPMkA0OsqNAlc3C88sq"},
-      {plan_annual: "price_1RzvruPMkA0OsqNASGGR0LeI"}
-    ]
+      const priceIds = {
+        plan_monthly: "price_1RzvtZPMkA0OsqNAlc3C88sq",
+        plan_annual: "price_1RzvruPMkA0OsqNASGGR0LeI"
+      }
 
-    const priceId = priceIds[planId]
-    if (!priceId) {
-      res.status(400).json({error: "The planId is incorrect"})
-    } else {
+      const priceId = priceIds[planId]
+      if (!priceId) {
+        res.status(400).json({error: "The planId is incorrect"})
+        return
+      }
       const subscription = await stripe.subscriptions.create({
         customer: customer.stripeCustomerId,
-        items: [{ price: priceId as any }],
-        payment_behavior: "default_incomplete",     // wait for payment confirmation if needed
-        expand: ["latest_invoice.payment_intent"],  // so we can confirm on client if required
+        items: [{ price: priceId }],
+        collection_method: "charge_automatically",
+        payment_behavior: "default_incomplete", // wait for payment confirmation if needed
+        payment_settings: {
+          payment_method_types: ["card"],
+          save_default_payment_method: "on_subscription",
+        },
+        metadata: {
+          userId: appUserId,
+          planId
+        },
+        expand: ["latest_invoice", 'latest_invoice.payments', "latest_invoice.payment_intent"], // NOTE: no .payment_intent here
       });
+
+      // Test: fail
+      // type InvoiceWithPI = Stripe.Invoice & {
+      //   payment_intent?: Stripe.PaymentIntent
+      // };
+      // const response = await stripe.invoices.retrieve((subscription.latest_invoice as Stripe.Invoice).id, {
+      //   expand: ["payment_intent"],
+      // });
+      // const invoice = response as InvoiceWithPI;
+      // console.log(invoice)
+      // const paymentIntent = invoice.payment_intent
+
+      const latestInvoice = subscription.latest_invoice
+      let paymentIntentId
+      if (typeof latestInvoice !== "string") {
+        paymentIntentId = (latestInvoice as Stripe.Invoice).payments.data.find((p) => p.payment?.type === "payment_intent").payment?.payment_intent
+      }
+      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId)
+
+      res.json({
+        subscriptionId: subscription.id,
+        status: subscription.status,
+        clientSecret: paymentIntent?.client_secret ?? null,
+        requiresAction: paymentIntent?.status === "requires_payment_method",
+        paymentIntentStatus: paymentIntent?.status
+      })
+    } catch (e) {
+      console.error(e)
+      res.status(500).json({error: "failed to subscribe"})
     }
   }
 }

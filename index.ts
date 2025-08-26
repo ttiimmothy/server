@@ -1,7 +1,6 @@
 import express,{urlencoded, json, text, raw} from "express";
 import cors from "cors";
-import {prisma, routes} from "@/routes";
-import cookieParser from "cookie-parser";
+import {routes} from "@/routes";
 import {config} from "dotenv";
 import {deletePasswordResetToken} from "@/lib/deletePasswordResetToken";
 import Stripe from "stripe";

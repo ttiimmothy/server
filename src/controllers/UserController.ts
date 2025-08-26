@@ -1,4 +1,4 @@
-import {uuidSchema} from "@/utils/zodSchema";
+import {uuidSchema} from "@/lib/zodSchema";
 import {PrismaClient} from "@prisma/client";
 import {hash} from "bcryptjs";
 import {Request, Response} from "express"

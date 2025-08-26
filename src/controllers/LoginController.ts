@@ -1,7 +1,7 @@
 import {PrismaClient, User} from "@prisma/client";
 import {Request, Response} from "express"
 import {compare, hash} from "bcryptjs";
-import { sign, verify } from 'jsonwebtoken';
+import {sign} from 'jsonwebtoken';
 import {createTransport} from "nodemailer";
 // node built-in crypto, haven't installed in the dependencies
 import {randomBytes} from "crypto";
@@ -13,7 +13,6 @@ export class LoginController {
   login = async (req: Request, res: Response) => {
     try {
       const {email, password} = req.body
-
       if (!email || !password) {
         res.status(400).json({error: "email or password is missing"})
         return
@@ -22,19 +21,16 @@ export class LoginController {
       const user = await this.prisma.user.findUnique({
         where: { email }
       })
-
       if (!user) {
         res.status(401).json({error: "There is no this user"})
         return
       }
-
       if (!user.password) {
         res.status(400).json({ 
           error: "This account is registered via Google login. Please login with Google." 
         });
         return;
       }
-
       if (user.isDeleted) {
         res.json({message: "This user is deactivated"})
         return
@@ -48,7 +44,6 @@ export class LoginController {
       }
 
       const {password: userPassword, ...userPayload} = user
-
       const token = sign(userPayload, process.env.JWT_SECRET, 
         // { expiresIn: "48h" }
       )

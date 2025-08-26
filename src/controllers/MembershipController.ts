@@ -1,7 +1,7 @@
 import {PrismaClient, User} from "@prisma/client";
 import {Request, Response} from "express"
 import {stripe} from "@/..";
-import {planSchema} from "@/utils/zodSchema";
+import {planSchema} from "@/lib/zodSchema";
 import Stripe from "stripe";
 
 export class MembershipController {

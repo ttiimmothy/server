@@ -1,6 +1,6 @@
-import {prisma} from "@/router/routes";
+import {prisma} from "@/routes";
 import {Request, Response} from "express"
-import {stripe} from "../..";
+import {stripe} from "..";
 
 export const webhook = async (req: Request, res: Response) => {
   const sig = req.headers["stripe-signature"]

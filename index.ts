@@ -1,9 +1,9 @@
-import express,{urlencoded, json, text, raw, Request, Response} from "express";
+import express,{urlencoded, json, text, raw} from "express";
 import cors from "cors";
 import {prisma, routes} from "@/router/routes";
 import cookieParser from "cookie-parser";
 import {config} from "dotenv";
-import {deletePasswordResetToken} from "@/utils/deletePasswordResetToken";
+import {deletePasswordResetToken} from "@/lib/deletePasswordResetToken";
 import Stripe from "stripe";
 import {webhook} from "@/middleware/stripeWebhook";
 
@@ -14,7 +14,7 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 // NOTE: stripe webhooks need the identical raw body, express.json will turn the string into the object, but webhooks need the string that stripe signs
 // even JSON.stringify to turn the object back to string don't work -> not identical to the string that stripe signs, so need to use express.raw
 // IMPORTANT: need to put before express.json, otherwise the incoming req.body will be parsed to JSON object
-app.post("/api/stripe/webhook", raw({type: "application/json"}), webhook)
+app.post("/api/stripe/normal/webhooks", raw({type: "application/json"}), webhook)
 
 // NOTE: only require for form submission, parses URL-encoded bodies <form method="POST" action="/submit"></form>
 app.use(urlencoded({extended: true}))

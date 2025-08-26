@@ -8,7 +8,6 @@ import {LoginController} from "@/controllers/LoginController";
 import {AuthMiddleware} from "@/middleware/AuthMiddleware";
 import {UserController} from "@/controllers/UserController";
 import {MembershipController} from "@/controllers/MembershipController";
-import {webhook} from "@/middleware/stripeWebhook";
 
 export const prisma = new PrismaClient();
 const categoryController = new CategoryController(prisma);

@@ -1,13 +1,15 @@
 import {PrismaClient} from "@prisma/client";
-import {hash} from "bcryptjs";
-import {config} from "dotenv";
+import bcrypt from "bcryptjs";
+import dotenv from "dotenv";
+import {checklistSeed} from "./checklistSeed";
+import {documentSeed} from "./documentSeed";
+import {planSeed} from "./planSeed";
 
-config()
-
+dotenv.config()
 const prisma = new PrismaClient();
 
 const seed = async () => {
-  const hashPassword = await hash(process.env.SEED_USER_PASSWORD, 10)
+  const hashPassword = await bcrypt.hash(process.env.SEED_USER_PASSWORD, 10)
   const user = await prisma.user.upsert({
     where: { email: 'timothyemail805@gmail.com' },
     update: {},
@@ -36,7 +38,7 @@ const seed = async () => {
     create: {
       displayName: "Timothy",
       email: "timothytimodanieliel@gmail.com",
-      password: await hash("000",10)
+      password: await bcrypt.hash("000",10)
     },
   })
 
@@ -156,7 +158,10 @@ const seed = async () => {
     }
   })
 
-  console.log({ user, funeralAndMemorial, digitalLegacy, checklist })
+  console.log(user, funeralAndMemorial, digitalLegacy, checklist)
+  await checklistSeed()
+  await documentSeed()
+  await planSeed()
 }
 
 seed();

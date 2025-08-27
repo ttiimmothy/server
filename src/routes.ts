@@ -1,5 +1,5 @@
 import {PrismaClient} from "@prisma/client";
-import {Router} from "express";
+import {raw, Router} from "express";
 import {CategoryController} from "@/controllers/CategoryController";
 import {ChecklistController} from "@/controllers/ChecklistController";
 import {DocumentController} from "@/controllers/DocumentController";
@@ -9,7 +9,7 @@ import {AuthMiddleware} from "@/middleware/AuthMiddleware";
 import {UserController} from "@/controllers/UserController";
 import {MembershipController} from "@/controllers/MembershipController";
 
-const prisma = new PrismaClient();
+export const prisma = new PrismaClient();
 const categoryController = new CategoryController(prisma);
 const checklistController = new ChecklistController(prisma)
 const documentController = new DocumentController(prisma)
@@ -53,4 +53,9 @@ routes.put("/users/change/password/user/:id", authMiddleware.verifyJsonWebToken,
 routes.delete("/user/:id", userController.deleteUser)
 
 routes.get("/memberships/user/:id", authMiddleware.verifyJsonWebToken, membershipController.getMembership)
-routes.put("/memberships/user/:id", authMiddleware.verifyJsonWebToken, membershipController.updateMembership)
+routes.put("/memberships/user", authMiddleware.verifyJsonWebToken, membershipController.updateMembership)
+routes.delete("/memberships/user", authMiddleware.verifyJsonWebToken, membershipController.cancelSubscription)
+routes.post("/memberships/stripe/setupintent/:id", authMiddleware.verifyJsonWebToken, membershipController.getCustomerAndSetupIntent)
+routes.post("/memberships/stripe/subscription", authMiddleware.verifyJsonWebToken, membershipController.stripeSubscribe)
+
+routes.get("/memberships/plans", membershipController.getAvailablePlans)

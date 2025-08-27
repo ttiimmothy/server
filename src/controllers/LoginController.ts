@@ -1,7 +1,7 @@
 import {PrismaClient, User} from "@prisma/client";
 import {Request, Response} from "express"
-import {compare, hash} from "bcryptjs";
-import { sign, verify } from 'jsonwebtoken';
+import bcrypt, {compare} from "bcryptjs";
+import jsonwebtoken from 'jsonwebtoken';
 import {createTransport} from "nodemailer";
 // node built-in crypto, haven't installed in the dependencies
 import {randomBytes} from "crypto";
@@ -13,7 +13,6 @@ export class LoginController {
   login = async (req: Request, res: Response) => {
     try {
       const {email, password} = req.body
-
       if (!email || !password) {
         res.status(400).json({error: "email or password is missing"})
         return
@@ -22,19 +21,16 @@ export class LoginController {
       const user = await this.prisma.user.findUnique({
         where: { email }
       })
-
       if (!user) {
         res.status(401).json({error: "There is no this user"})
         return
       }
-
       if (!user.password) {
         res.status(400).json({ 
           error: "This account is registered via Google login. Please login with Google." 
         });
         return;
       }
-
       if (user.isDeleted) {
         res.json({message: "This user is deactivated"})
         return
@@ -48,8 +44,7 @@ export class LoginController {
       }
 
       const {password: userPassword, ...userPayload} = user
-
-      const token = sign(userPayload, process.env.JWT_SECRET, 
+      const token = jsonwebtoken.sign(userPayload, process.env.JWT_SECRET, 
         // { expiresIn: "48h" }
       )
 
@@ -105,7 +100,7 @@ export class LoginController {
       return
     }
 
-    const hashPassword = await hash(password, 10)
+    const hashPassword = await bcrypt.hash(password, 10)
     const newUser = await this.prisma.user.create(
       {
         data: {
@@ -207,7 +202,7 @@ export class LoginController {
         email: tokenRecord.email
       },
       data: {
-        password: await hash(newPassword, 10)
+        password: await bcrypt.hash(newPassword, 10)
       }
     })
 
@@ -258,11 +253,11 @@ export class LoginController {
         // NOTE: check password, if password is undefined, it can't be extract from the object
         if (checkGoogleUserExist.password) {
           const {password, ...userPayload} = checkGoogleUserExist
-          const jwt = sign(userPayload, process.env.JWT_SECRET)
+          const jwt = jsonwebtoken.sign(userPayload, process.env.JWT_SECRET)
           
           res.json({user: userPayload, token: jwt})
         } else {
-          const jwt = sign(checkGoogleUserExist, process.env.JWT_SECRET)
+          const jwt = jsonwebtoken.sign(checkGoogleUserExist, process.env.JWT_SECRET)
           res.json({user: checkGoogleUserExist, token: jwt})
         }
         return
@@ -285,7 +280,7 @@ export class LoginController {
           }
         })
 
-        const jwtForNewUser = sign(newUser, process.env.JWT_SECRET)
+        const jwtForNewUser = jsonwebtoken.sign(newUser, process.env.JWT_SECRET)
 
         res.json({user: newUser, token: jwtForNewUser})
         return
@@ -312,15 +307,15 @@ export class LoginController {
       // don't need to check user.pasword exist
       // if (user.password) {
       //   const {password, ...userPayload} = checkGoogleUserExist
-      //   const jwt = sign(userPayload, process.env.JWT_SECRET)
+      //   const jwt = jsonwebtoken.sign(userPayload, process.env.JWT_SECRET)
       //   res.json({user: userPayload, token: jwt})
       // } else {
-      //   const jwt = sign(user, process.env.JWT_SECRET)
+      //   const jwt = jsonwebtoken.sign(user, process.env.JWT_SECRET)
       //   res.json({user, token: jwt})
       // }
 
       const {password, ...userPayload} = checkGoogleUserExist
-      const jwt = sign(userPayload, process.env.JWT_SECRET)
+      const jwt = jsonwebtoken.sign(userPayload, process.env.JWT_SECRET)
       res.json({user: userPayload, token: jwt})
     } catch (e) {
       console.error(e);

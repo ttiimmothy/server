@@ -2,7 +2,7 @@ import {PrismaClient} from "@prisma/client";
 
 const prisma = new PrismaClient;
 
-const document = async () => {
+export const documentSeed = async () => {
   const user = await prisma.user.findUnique({
     where: {
       email: "timothyemail805@gmail.com"
@@ -33,5 +33,3 @@ const document = async () => {
     console.log(documentCreate)
   }
 }
-
-document()

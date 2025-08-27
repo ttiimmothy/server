@@ -1,7 +1,7 @@
+import {uuidSchema} from "@/lib/zodSchema";
 import {PrismaClient} from "@prisma/client";
-import {hash} from "bcryptjs";
+import bcrypt from "bcryptjs";
 import {Request, Response} from "express"
-import {validate} from "uuid"
 
 export class UserController {
   constructor (public prisma: PrismaClient) {}
@@ -13,8 +13,7 @@ export class UserController {
       res.status(400).json({error: "There is no user id"})
       return
     }
-
-    if (!validate(userId)) {
+    if (!uuidSchema.safeParse(userId)) {
       res.status(400).json({error: "Invalid user id format. It should be uuid"})
       return
     }
@@ -28,7 +27,6 @@ export class UserController {
       res.status(404).json({error: "There is no this user profile"})
       return
     }
-
     if (user.isDeleted) {
       res.status(400).json({error: "This user is deactivated"})
       return
@@ -47,12 +45,10 @@ export class UserController {
       res.status(400).json({error: "There is no user id"})
       return
     }
-
-    if (!validate(userId)) {
+    if (!uuidSchema.safeParse(userId)) {
       res.status(400).json({error: "Invalid user id format. It should be uuid"})
       return
     }
-
     if (!req.body) {
       res.status(400).json({error: "There is no user information for update"})
       return
@@ -76,12 +72,10 @@ export class UserController {
       res.status(400).json({error: "There is no user id"})
       return
     }
-
-    if (!validate(userId)) {
+    if (!uuidSchema.safeParse(userId)) {
       res.status(400).json({error: "Invalid user id format. It should be uuid"})
       return
     }
-
     if (!email) {
       res.status(400).json({error: "email is missing"})
       return
@@ -95,7 +89,6 @@ export class UserController {
       res.status(404).json({error: "There is no this user"})
       return
     }
-
     if (user.isDeleted) {
       res.status(400).json({error: "This user is deactivated"})
       return
@@ -112,8 +105,7 @@ export class UserController {
       res.status(400).json({error: "There is no user id"})
       return
     }
-
-    if (!validate(id)) {
+    if (!uuidSchema.safeParse(id)) {
       res.status(400).json({error: "Invalid user id format. It should be uuid"})
       return
     }
@@ -126,18 +118,16 @@ export class UserController {
       res.status(404).json({error: "There is no this user"})
       return
     }
-
     if (user.isDeleted) {
       res.status(400).json({error: "This user is deactivated"})
       return
     }
-
     if (!newPassword) {
       res.status(400).json({error: "There is no password for update"})
       return
     }
 
-    const hashPassword = await hash(newPassword, 10)
+    const hashPassword = await bcrypt.hash(newPassword, 10)
     await this.prisma.user.update({
       where: {id},
       data: { password: hashPassword }

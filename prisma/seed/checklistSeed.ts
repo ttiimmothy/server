@@ -2,7 +2,7 @@ import {PrismaClient} from "@prisma/client";
 
 const prisma = new PrismaClient;
 
-const checklist = async () => {
+export const checklistSeed = async () => {
   const category = await prisma.category.findUnique({where: {name: "Family death"}, select: {id: true}})
   const user = await prisma.user.findUnique({where: {email: "timothyemail805@gmail.com"}, select: {id: true}})
 
@@ -207,5 +207,3 @@ const checklist = async () => {
     }
   }
 }
-
-checklist()

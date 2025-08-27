@@ -35,14 +35,14 @@ export class MembershipController {
     if (subscriptionPlan.isTrial) {
       membership = await this.prisma.subscription.upsert({
         where: {userId},
-        update: {...req.body, endDate: new Date(startDate.getTime() + 7 * 24 * 60 * 60 * 1000)},
-        create: {...req.body, endDate: new Date(startDate.getTime() + 7 * 24 * 60 * 60 * 1000), userId},
+        update: {...req.body, endDate: new Date(new Date(startDate).getTime() + 7 * 24 * 60 * 60 * 1000), canceledAt: null},
+        create: {...req.body, endDate: new Date(new Date(startDate).getTime() + 7 * 24 * 60 * 60 * 1000), canceledAt: null, userId},
       })
     } else {
       membership = await this.prisma.subscription.upsert({
         where: {userId},
-        update: req.body,
-        create: {...req.body, userId},
+        update: {...req.body, canceledAt: null},
+        create: {...req.body, canceledAt: null, userId},
       })
     }
     res.json(membership)
@@ -197,7 +197,7 @@ export class MembershipController {
         data: {
           status: "past_due",
           activeStatus: false,
-          cancelledAt: new Date()
+          canceledAt: new Date()
         }
       })
       res.json(subscription)
@@ -208,7 +208,7 @@ export class MembershipController {
       const newSubscription = await this.prisma.subscription.update({
         where: {userId: appUserId},
         data: {
-          cancelledAt: new Date()
+          canceledAt: new Date()
         }
       })
       res.json(newSubscription)

@@ -43,11 +43,10 @@ export const webhook = async (req: Request, res: Response) => {
     }
     case "customer.subscription.updated":
     case "customer.subscription.deleted": {
-      // TODO: sync subscription status in DB (active, past_due, canceled, etc.)
       const subscription = event.data.object
-      const periodStart = new Date((subscription.items.data[0]?.period?.start ?? 0) * 1000)
-      // const periodEnd = invoice.lines.data[0]?.period?.end; // unix ts
-      const periodEnd = new Date((subscription.items.data[0]?.period?.end ?? 0) * 1000)
+      const subscriptionItem = subscription.items.data[0];
+      const periodStart = new Date(subscriptionItem.current_period_start * 1000);
+      const periodEnd = new Date(subscriptionItem.current_period_end * 1000);
       const status = {
         "incomplete": false,
         "incomplete_expired": false,
@@ -66,7 +65,7 @@ export const webhook = async (req: Request, res: Response) => {
           status: subscription.status,
           activeStatus: status[subscription.status],
           startDate: periodStart,
-          endDate: periodEnd,
+          endDate: subscription.ended_at ? new Date(subscription.ended_at * 1000) : periodEnd,
           stripeSubscriptionId: subscription.id,
           stripePriceId: subscription.items.data[0]?.price?.id,
         },
@@ -75,7 +74,7 @@ export const webhook = async (req: Request, res: Response) => {
           status: subscription.status,
           activeStatus: status[subscription.status],
           startDate: periodStart,
-          endDate: periodEnd,
+          endDate: subscription.ended_at ? new Date(subscription.ended_at * 1000) : periodEnd,
           stripeSubscriptionId: subscription.id,
           stripePriceId: subscription.items.data[0]?.price?.id,
           userId: subscription.metadata.userId

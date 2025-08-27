@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import dotenv from "dotenv";
 import {checklistSeed} from "./checklistSeed";
 import {documentSeed} from "./documentSeed";
+import {planSeed} from "./planSeed";
 
 dotenv.config()
 const prisma = new PrismaClient();
@@ -160,6 +161,7 @@ const seed = async () => {
   console.log(user, funeralAndMemorial, digitalLegacy, checklist)
   await checklistSeed()
   await documentSeed()
+  await planSeed()
 }
 
 seed();

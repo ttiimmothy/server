@@ -53,6 +53,9 @@ routes.put("/users/change/password/user/:id", authMiddleware.verifyJsonWebToken,
 routes.delete("/user/:id", userController.deleteUser)
 
 routes.get("/memberships/user/:id", authMiddleware.verifyJsonWebToken, membershipController.getMembership)
-routes.put("/memberships/user/:id", authMiddleware.verifyJsonWebToken, membershipController.updateMembership)
+routes.put("/memberships/user", authMiddleware.verifyJsonWebToken, membershipController.updateMembership)
+routes.delete("/memberships/user", authMiddleware.verifyJsonWebToken, membershipController.cancelSubscription)
 routes.post("/memberships/stripe/setupintent/:id", authMiddleware.verifyJsonWebToken, membershipController.getCustomerAndSetupIntent)
 routes.post("/memberships/stripe/subscription", authMiddleware.verifyJsonWebToken, membershipController.stripeSubscribe)
+
+routes.get("/memberships/plans", membershipController.getAvailablePlans)

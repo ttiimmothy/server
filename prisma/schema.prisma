@@ -177,10 +177,12 @@ model Subscription {
   startDate DateTime @map("start_date")
   endDate DateTime? @map("end_date")
   createdAt DateTime @default(now()) @map("created_at")
+  cancelledAt DateTime? @map("cancelled_at")
 
   // since subscriptionId update when the same user cancel and recreate subscription, to keep to one-to-one relation, need to update when the subscriptionId updates
-  stripeSubscriptionId String @db.VarChar(255) @map("stripe_subscription_id")
-  stripePriceId String @db.VarChar(255) @map("stripe_price_id")
+  stripeSubscriptionId String? @db.VarChar(255) @map("stripe_subscription_id")
+  // these 2 won't have in plan_trial
+  stripePriceId String? @db.VarChar(255) @map("stripe_price_id")
 
   user User @relation(fields: [userId],references: [id])
   userId String @db.Uuid @unique @map("user_id")
@@ -196,4 +198,20 @@ model PasswordResetToken {
   createdAt DateTime @default(now()) @map("created_at")
 
   @@map("passwordresettokens")
+}
+
+model AvailablePlan {
+  id String @id @default(uuid()) @db.Uuid
+  planId String @unique @db.VarChar(255) @map("plan_id")
+  name String @db.VarChar(255)
+  description String
+  durationMonths Float? @map("duration_months")
+  price Int
+  features String[]
+  isTrial Boolean @map("is_trial")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  stripePriceId String? @db.VarChar(255) @unique @map("stripe_price_id")
+
+  @@map("availableplans")
 }

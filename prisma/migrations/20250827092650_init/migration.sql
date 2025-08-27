@@ -140,7 +140,7 @@ CREATE TABLE "public"."subscriptions" (
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "stripe_subscription_id" VARCHAR(255) NOT NULL,
     "stripe_price_id" VARCHAR(255) NOT NULL,
-    "user_id" UUID,
+    "user_id" UUID NOT NULL,
 
     CONSTRAINT "subscriptions_pkey" PRIMARY KEY ("id")
 );
@@ -154,6 +154,22 @@ CREATE TABLE "public"."passwordresettokens" (
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "passwordresettokens_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "public"."availableplans" (
+    "id" UUID NOT NULL,
+    "plan_id" VARCHAR(255) NOT NULL,
+    "name" VARCHAR(255) NOT NULL,
+    "description" TEXT NOT NULL,
+    "durationMonths" INTEGER NOT NULL,
+    "price" INTEGER NOT NULL,
+    "features" TEXT[],
+    "is_trial" BOOLEAN NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "stripe_price_id" VARCHAR(255),
+
+    CONSTRAINT "availableplans_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -175,13 +191,16 @@ CREATE UNIQUE INDEX "categories_item_order_key" ON "public"."categories"("item_o
 CREATE UNIQUE INDEX "serviceproviders_name_key" ON "public"."serviceproviders"("name");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "subscriptions_stripe_subscription_id_key" ON "public"."subscriptions"("stripe_subscription_id");
-
--- CreateIndex
 CREATE UNIQUE INDEX "subscriptions_user_id_key" ON "public"."subscriptions"("user_id");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "passwordresettokens_token_key" ON "public"."passwordresettokens"("token");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "availableplans_plan_id_key" ON "public"."availableplans"("plan_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "availableplans_stripe_price_id_key" ON "public"."availableplans"("stripe_price_id");
 
 -- AddForeignKey
 ALTER TABLE "public"."checklists" ADD CONSTRAINT "checklists_category_id_fkey" FOREIGN KEY ("category_id") REFERENCES "public"."categories"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -205,4 +224,4 @@ ALTER TABLE "public"."documents" ADD CONSTRAINT "documents_user_id_fkey" FOREIGN
 ALTER TABLE "public"."documents" ADD CONSTRAINT "documents_category_id_fkey" FOREIGN KEY ("category_id") REFERENCES "public"."categories"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."subscriptions" ADD CONSTRAINT "subscriptions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "public"."subscriptions" ADD CONSTRAINT "subscriptions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -16,13 +16,35 @@ export class MembershipController {
     res.json(subscription)
   }
 
-  updateMembership = async (req: Request, res: Response) => {
-    const {id} = req.params
-    const membership = await this.prisma.subscription.upsert({
-      where: {userId: id},
-      update: req.body,
-      create: req.body
+  // for plan_trial to update subscription table
+  updateMembership = async (req: Request & {user: Omit<User, "password">}, res: Response) => {
+    const userId = req.user.id
+    const {
+      plan,
+      status,
+      activeStatus,
+      startDate
+    } = req.body
+
+    const subscriptionPlan = await this.prisma.availablePlan.findUnique({
+      where: {
+        planId: plan
+      }
     })
+    let membership
+    if (subscriptionPlan.isTrial) {
+      membership = await this.prisma.subscription.upsert({
+        where: {userId},
+        update: {...req.body, endDate: new Date(startDate.getTime() + 7 * 24 * 60 * 60 * 1000)},
+        create: {...req.body, endDate: new Date(startDate.getTime() + 7 * 24 * 60 * 60 * 1000), userId},
+      })
+    } else {
+      membership = await this.prisma.subscription.upsert({
+        where: {userId},
+        update: req.body,
+        create: {...req.body, userId},
+      })
+    }
     res.json(membership)
   }
 
@@ -31,7 +53,7 @@ export class MembershipController {
   getCustomerAndSetupIntent = async (req: Request, res: Response) => {
     try {
       const {id: userId} = req.params
-      const {email} = req.body || {}
+      const {email, planId} = req.body || {}
       let customer = await this.prisma.user.findUnique({
         where: {id: userId}
       })
@@ -48,11 +70,25 @@ export class MembershipController {
           }
         })
       }
-      const setupIntent = await stripe.setupIntents.create({
-        customer: customer.stripeCustomerId,
-        payment_method_types: ["card"]
+      
+      const subscriptionPlan = await this.prisma.availablePlan.findUnique({
+        where: {planId}
       })
-      res.json({clientSecret: setupIntent.client_secret})
+
+      if (!subscriptionPlan) {
+        res.status(400).json({error: "There is no this subscription plan"})
+        return
+      }
+
+      let setupIntent
+      if (subscriptionPlan.isTrial) {
+        setupIntent = await stripe.setupIntents.create({
+          customer: customer.stripeCustomerId,
+          payment_method_types: ["card"]
+        })
+      }
+      
+      res.json({clientSecret: setupIntent ? setupIntent.client_secret : null, message: "setupIntent"})
     } catch (e) {
       res.status(500).json({error: "failed to create setupIntent"})
     }
@@ -61,7 +97,7 @@ export class MembershipController {
   stripeSubscribe = async (req: Request & {user:Omit<User, "password">}, res: Response) => {
     try {
       const appUserId = req.user.id
-      const {planId} = req.body
+      const {planId, defaultPaymentMethod} = req.body
       const parseResult = planSchema.safeParse(planId)
       if (!parseResult) {
         res.status(400).json({error: "invalid planId"})
@@ -72,22 +108,28 @@ export class MembershipController {
         where: {id: appUserId}
       })
 
-      const priceIds = {
-        plan_monthly: "price_1RzvtZPMkA0OsqNAlc3C88sq",
-        plan_annual: "price_1RzvruPMkA0OsqNASGGR0LeI"
-      }
+      // const priceIds = {
+      //   plan_monthly: "price_1RzvtZPMkA0OsqNAlc3C88sq",
+      //   plan_annual: "price_1RzvruPMkA0OsqNASGGR0LeI"
+      // }
 
-      const priceId = priceIds[planId]
-      if (!priceId) {
+      // const priceId = priceIds[planId]
+      const plan = await this.prisma.availablePlan.findUnique({
+        where: {
+          planId
+        }
+      })
+      if (!plan) {
         res.status(400).json({error: "The planId is incorrect"})
         return
       }
       const subscription = await stripe.subscriptions.create({
         customer: customer.stripeCustomerId,
-        items: [{ price: priceId }],
-        collection_method: "charge_automatically",
+        items: [{ price: plan.stripePriceId }],
+        // collection_method: "charge_automatically",
         payment_behavior: "default_incomplete", // wait for payment confirmation if needed
         payment_settings: {
+          // NOTE: save the payment method for plan renewal charge use
           payment_method_types: ["card"],
           save_default_payment_method: "on_subscription",
         },
@@ -96,6 +138,12 @@ export class MembershipController {
           planId
         },
         expand: ["latest_invoice", 'latest_invoice.payments', "latest_invoice.payment_intent"], // NOTE: no .payment_intent here
+        ...(plan.isTrial ? 
+          {trial_period_days: 7} : {}
+        ),
+        ...(defaultPaymentMethod ?
+          {default_payment_method: defaultPaymentMethod} : {}
+        )
       });
 
       // Test: fail
@@ -127,5 +175,48 @@ export class MembershipController {
       console.error(e)
       res.status(500).json({error: "failed to subscribe"})
     }
+  }
+
+  cancelSubscription = async (req: Request & {user: Omit<User, "password">}, res: Response) => {
+    const appUserId = req.user.id
+    const subscription = await this.prisma.subscription.findUnique({
+      where: {userId: appUserId}
+    })
+
+    if (!subscription) {
+      res.status(400).json({error: "This user hasn't subscribed before"})
+      return
+    }
+
+    const subscriptionPlan = await this.prisma.availablePlan.findUnique({
+      where: {planId: subscription.plan}
+    })
+    if (subscriptionPlan.isTrial) {
+      const subscription = await this.prisma.subscription.update({
+        where: {userId: appUserId},
+        data: {
+          status: "past_due",
+          activeStatus: false,
+          cancelledAt: new Date()
+        }
+      })
+      res.json(subscription)
+    } else if (subscriptionPlan.isTrial === false) {
+      await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
+        cancel_at_period_end: true,
+      })
+      const newSubscription = await this.prisma.subscription.update({
+        where: {userId: appUserId},
+        data: {
+          cancelledAt: new Date()
+        }
+      })
+      res.json(newSubscription)
+    }
+  }
+
+  getAvailablePlans = async (req: Request, res: Response) => {
+    const plans = await this.prisma.availablePlan.findMany()
+    res.json(plans)
   }
 }

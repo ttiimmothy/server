@@ -32,7 +32,6 @@ export const webhook = async (req: Request, res: Response) => {
         // expand: ['latest_invoice.payment_intent', 'items.data.price.product'],
         expand: ['latest_invoice'],
       });
-      console.log(subscription)
       // const periodStart = new Date((invoice.lines.data[0]?.period?.start ?? 0) * 1000)
       // const periodEnd = invoice.lines.data[0]?.period?.end; // unix ts
       // const periodEnd = new Date((invoice.lines.data[0]?.period?.end ?? 0) * 1000)

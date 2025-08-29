@@ -6,7 +6,7 @@ import {DocumentController} from "@/controllers/DocumentController";
 import {ServiceProviderController} from "@/controllers/ServiceProviderController";
 import {LoginController} from "@/controllers/LoginController";
 import {AuthMiddleware} from "@/middleware/AuthMiddleware";
-import {UserController} from "@/controllers/UserController";
+import {UserProfileController} from "@/controllers/UserProfileController";
 import {MembershipController} from "@/controllers/MembershipController";
 
 export const prisma = new PrismaClient();
@@ -15,7 +15,7 @@ const checklistController = new ChecklistController(prisma)
 const documentController = new DocumentController(prisma)
 const serviceProviderController = new ServiceProviderController(prisma);
 const loginController = new LoginController(prisma)
-const userController = new UserController(prisma)
+const userProfileController = new UserProfileController(prisma)
 const membershipController = new MembershipController(prisma)
 
 const authMiddleware = new AuthMiddleware()
@@ -44,13 +44,13 @@ routes.post("/users/forget/password", loginController.forgetPassword)
 routes.post("/users/reset/password", loginController.resetPassword)
 routes.post("/users/login/google", loginController.googleLogin)
 
-routes.get("/users/info/user/:id", authMiddleware.verifyJsonWebToken, userController.getUserInformation)
-routes.put("/users/info/user/:id", authMiddleware.verifyJsonWebToken, userController.updateUserInformation)
+routes.get("/users/info/user/:id", authMiddleware.verifyJsonWebToken, userProfileController.getUserInformation)
+routes.put("/users/info/user/:id", authMiddleware.verifyJsonWebToken, userProfileController.updateUserInformation)
 // check user exist for deleting that user account
-routes.post("/users/check/user/:id", authMiddleware.verifyJsonWebToken, userController.checkUser)
-routes.put("/users/change/password/user/:id", authMiddleware.verifyJsonWebToken, userController.changePassword)
+routes.post("/users/check/user/:id", authMiddleware.verifyJsonWebToken, userProfileController.checkUser)
+routes.put("/users/change/password/user/:id", authMiddleware.verifyJsonWebToken, userProfileController.changePassword)
 
-routes.delete("/user/:id", userController.deleteUser)
+routes.delete("/user/:id", userProfileController.deleteUser)
 
 routes.get("/memberships/user/:id", authMiddleware.verifyJsonWebToken, membershipController.getMembership)
 routes.put("/memberships/user", authMiddleware.verifyJsonWebToken, membershipController.updateMembership)

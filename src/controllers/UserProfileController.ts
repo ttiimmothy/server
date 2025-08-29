@@ -3,7 +3,7 @@ import {PrismaClient} from "@prisma/client";
 import bcrypt from "bcryptjs";
 import {Request, Response} from "express"
 
-export class UserController {
+export class UserProfileController {
   constructor (public prisma: PrismaClient) {}
 
   getUserInformation = async (req: Request, res: Response) => {

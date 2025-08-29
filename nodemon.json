@@ -1,0 +1,11 @@
+{
+  "verbose": false,
+  "execMap": {
+    "rb": "ruby",
+    "pde": "processing --sketch={{pwd}} --run",
+    "ts": "tsx",
+    "tsx": "tsx"
+  },
+  "colours": false,
+  "watch": ["index.ts"]
+}

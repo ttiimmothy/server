@@ -314,7 +314,11 @@ export class LoginController {
       //   res.json({user, token: jwt})
       // }
 
-      const {password, ...userPayload} = checkGoogleUserExist
+      // ERROR: Cannot destructure property 'password' of 'checkGoogleUserExist' as it is null.
+      // NOTE: checkGoogleUserExist shouldn't be used here
+      // const {password, ...userPayload} = checkGoogleUserExist
+
+      const {password, ...userPayload} = user
       const jwt = jsonwebtoken.sign(userPayload, process.env.JWT_SECRET)
       res.json({user: userPayload, token: jwt})
     } catch (e) {

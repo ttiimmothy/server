@@ -18,6 +18,7 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 // IMPORTANT: need to put before express.json, otherwise the incoming req.body will be parsed to JSON object
 app.post("/api/stripe/normal/webhooks", express.raw({type: "application/json"}), webhook)
 
+// assign the current client socket to a specific room
 io.on("connection", (socket) => {
   socket.on("join-user-room", (userId: string) => {
     socket.join(`user ${userId}`)

@@ -25,12 +25,13 @@ model User {
   notificationPreferences Json? @map("notification_preferences")
   accountStatus Json? @map("account_status")
   privacySettings Json? @map("privacy_settings")
-  // customerId for recurring payment use
-  stripeCustomerId String? @unique @map("stripe_customer_id")
   isDeleted Boolean @default(false) @map("is_deleted")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
+
+  // customerId for recurring payment use
+  stripeCustomerId String? @unique @map("stripe_customer_id")
 
   // one-to-one relation, not every user must have subscription
   subscription Subscription?

@@ -65,8 +65,9 @@ export class LoginController {
   }
 
   currentUser = async (req: Request & {user: Omit<User, "password">}, res: Response) => {
-    const user = req.user
-    res.json(user)
+    console.log("abc")
+    console.log(req.user)
+    res.json(req.user)
   }
 
   // NOTE: logout now can delete token in the expo-secure-store by deleteItemAsync in client, not call the logout api
@@ -291,6 +292,7 @@ export class LoginController {
       const user = await this.prisma.user.update({
         where: { id },
         data: {
+          // payload is from Google login ticket
           displayName: displayName ? displayName : payload.name,
           photoURL: photoURL ? photoURL : payload.picture,
           bio: bio ? bio : payload.profile,

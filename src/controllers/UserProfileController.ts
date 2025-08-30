@@ -1,5 +1,5 @@
 import {uuidSchema} from "@/lib/zodSchema";
-import {PrismaClient} from "@prisma/client";
+import {PrismaClient, User} from "@prisma/client";
 import bcrypt from "bcryptjs";
 import {Request, Response} from "express"
 
@@ -147,5 +147,20 @@ export class UserProfileController {
       }
     })
     res.json({message: "The user is deactivated"})
+  }
+
+  updateUserAvatar = async (req: Request & {user: Omit<User, "password">}, res: Response) => {
+    // multer helps store the file in req.file, multipart/form-data Parsing by multer
+    if (!req.file) {
+      res.status(400).json({ error: 'No file uploaded' });
+      return
+    }
+    const user = await this.prisma.user.update({
+      where: {id: req.user.id},
+      data: {
+        photoURL: req.file.filename
+      }
+    })
+    res.json(user)
   }
 }

@@ -5,11 +5,31 @@ import dotenv from "dotenv";
 import {deletePasswordResetToken} from "@/lib/deletePasswordResetToken";
 import Stripe from "stripe";
 import {webhook} from "@/stripeWebhook";
-import multer from "multer"
 import path from "path";
-import {app, io, server} from "./initServer";
+import {Server as httpServer} from "http"
+import {Server} from "socket.io"
+
+import {PrismaClient} from "@prisma/client";
+import {CategoryController} from "@/controllers/CategoryController";
+import {ChecklistController} from "@/controllers/ChecklistController";
+import {DocumentController} from "@/controllers/DocumentController";
+import {ServiceProviderController} from "@/controllers/ServiceProviderController";
+import {LoginController} from "@/controllers/LoginController";
+import {AuthMiddleware} from "@/middleware/AuthMiddleware";
+import {UserProfileController} from "@/controllers/UserProfileController";
+import {MembershipController} from "@/controllers/MembershipController";
 
 dotenv.config()
+
+const app = express();
+export const server = new httpServer(app)
+export const io = new Server(server, {
+  path: "/api/socket",
+  cors: {
+    origin: "*"
+  }
+})
+
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
 // NOTE: stripe webhooks need the identical raw body, express.json will turn the string into the object, but webhooks need the string that stripe signs
@@ -18,27 +38,12 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 // IMPORTANT: need to put before express.json, otherwise the incoming req.body will be parsed to JSON object
 app.post("/api/stripe/normal/webhooks", express.raw({type: "application/json"}), webhook)
 
+// assign the current client socket to a specific room
 io.on("connection", (socket) => {
   socket.on("join-user-room", (userId: string) => {
     socket.join(`user ${userId}`)
   })
 })
-
-const storage = multer.diskStorage({
-  destination: (req, file, callback) => {
-    if (req.path.startsWith("/api/documents/encrypted")) {
-      // Store files for encrypted routes
-      // NOTE: __dirname get the path of the root in project level instead of whole filesystem level
-      callback(null, path.resolve(__dirname, "encrypted_uploads"));
-    } else {
-      callback(null, path.resolve(__dirname, "/uploads"))
-    }
-  },
-  filename: (req, file, callback) => {
-    callback(null, `${file.fieldname}-${Date.now()}-${file.mimetype.split("/")[1]}`)
-  }
-})
-export const upload = multer({storage})
 
 // NOTE: only require for form submission, parses URL-encoded bodies <form method="POST" action="/submit"></form>
 app.use(express.urlencoded({extended: true}))
@@ -63,7 +68,12 @@ app.use(cors({
 }))
 
 app.use("/api", routes);
-app.use(express.static(path.resolve(__dirname, "uploads")))
+// to get the user avatar
+// NOTE: work for http://localhost:8080/avatar-1756457150809.jpe but not http://localhost:8080/uploads/avatar-1756457150809.jpeg
+// app.use(express.static(path.resolve(__dirname, "uploads")))
+
+// NOTE: work for http://localhost:8080/uploads/avatar-1756457150809.jpeg
+app.use("/uploads", express.static(path.resolve(__dirname, "uploads")))
 
 // run every hour
 setInterval(() => {

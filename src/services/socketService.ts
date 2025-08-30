@@ -1,5 +1,5 @@
 import {Request, Response} from "express"
-import {io} from "@/../initServer";
+import {io} from "@/..";
 
 export const notifySubscriptionUpdated = (userId: string, data) => {
   // subscription-updated is the param for connection, not the message itself

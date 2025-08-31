@@ -1,7 +1,6 @@
 import {prisma} from "@/routes";
 import {Request, Response} from "express"
-import {stripe} from "..";
-import {notifySubscriptionUpdated} from "./services/socketService";
+import {io, stripe} from "@/..";
 
 export const webhook = async (req: Request, res: Response) => {
   const sig = req.headers["stripe-signature"]
@@ -123,7 +122,7 @@ export const webhook = async (req: Request, res: Response) => {
         }
       })
 
-      notifySubscriptionUpdated(subscription.metadata.userId, {
+      io.to(`user ${subscription.metadata.userId}`).emit("subscription-updated", {
         type: 'subscription-updated',
         status: 'active'
       })

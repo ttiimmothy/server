@@ -40,6 +40,7 @@ app.use(express.urlencoded({extended: true}))
 // NOTE: require for json
 app.use(express.json());
 
+// NOTE: this is one of the methods for stripe webhook api
 // app.use((req, res, next) => {
 //   if (req.originalUrl === "/api/stripe/webhook") {
 //     return raw({ type: "application/json" })(req, res, next);

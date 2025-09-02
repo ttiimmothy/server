@@ -1,7 +1,6 @@
 import {prisma} from "@/routes";
 import {Request, Response} from "express"
-import {stripe} from "..";
-import {notifySubscriptionUpdated} from "./services/socketService";
+import {io, stripe} from "@/..";
 
 export const webhook = async (req: Request, res: Response) => {
   const sig = req.headers["stripe-signature"]
@@ -37,44 +36,6 @@ export const webhook = async (req: Request, res: Response) => {
       // const periodEnd = invoice.lines.data[0]?.period?.end; // unix ts
       // const periodEnd = new Date((invoice.lines.data[0]?.period?.end ?? 0) * 1000)
       
-      // const subscriptionItem = subscription.items.data[0];
-      // const periodStart = new Date(subscriptionItem.current_period_start * 1000);
-      // const periodEnd = new Date(subscriptionItem.current_period_end * 1000);
-      // const status = {
-      //   "incomplete": false,
-      //   "incomplete_expired": false,
-      //   "trialing": false,
-      //   "active": true,
-      //   "past_due": false,
-      //   "canceled": false,
-      //   "unpaid": false
-      // }
-      // await prisma.subscription.upsert({
-      //   where: {
-      //     userId: subscription.metadata.userId
-      //   },
-      //   update: {
-      //     plan: subscription.metadata.planId,
-      //     status: subscription.status,
-      //     activeStatus: status[subscription.status],
-      //     startDate: periodStart,
-      //     endDate: subscription.ended_at ? new Date(subscription.ended_at * 1000) : periodEnd,
-      //     canceledAt: subscription.canceled_at ? new Date(subscription.canceled_at * 1000) : null, 
-      //     stripeSubscriptionId: subscription.id,
-      //     stripePriceId: subscription.items.data[0]?.price?.id,
-      //   },
-      //   create: {
-      //     plan: subscription.metadata.planId,
-      //     status: subscription.status,
-      //     activeStatus: status[subscription.status],
-      //     startDate: periodStart,
-      //     endDate: subscription.ended_at ? new Date(subscription.ended_at * 1000) : periodEnd,
-      //     stripeSubscriptionId: subscription.id,
-      //     stripePriceId: subscription.items.data[0]?.price?.id,
-      //     userId: subscription.metadata.userId
-      //   }
-      // })
-
       break;
     }
     case "invoice.payment_failed": {
@@ -123,7 +84,7 @@ export const webhook = async (req: Request, res: Response) => {
         }
       })
 
-      notifySubscriptionUpdated(subscription.metadata.userId, {
+      io.to(`user ${subscription.metadata.userId}`).emit("subscription-updated", {
         type: 'subscription-updated',
         status: 'active'
       })

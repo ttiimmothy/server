@@ -9,16 +9,6 @@ import path from "path";
 import {Server as httpServer} from "http"
 import {Server} from "socket.io"
 
-import {PrismaClient} from "@prisma/client";
-import {CategoryController} from "@/controllers/CategoryController";
-import {ChecklistController} from "@/controllers/ChecklistController";
-import {DocumentController} from "@/controllers/DocumentController";
-import {ServiceProviderController} from "@/controllers/ServiceProviderController";
-import {LoginController} from "@/controllers/LoginController";
-import {AuthMiddleware} from "@/middleware/AuthMiddleware";
-import {UserProfileController} from "@/controllers/UserProfileController";
-import {MembershipController} from "@/controllers/MembershipController";
-
 dotenv.config()
 
 const app = express();
@@ -50,6 +40,7 @@ app.use(express.urlencoded({extended: true}))
 // NOTE: require for json
 app.use(express.json());
 
+// NOTE: this is one of the methods for stripe webhook api
 // app.use((req, res, next) => {
 //   if (req.originalUrl === "/api/stripe/webhook") {
 //     return raw({ type: "application/json" })(req, res, next);

@@ -65,8 +65,6 @@ export class LoginController {
   }
 
   currentUser = async (req: Request & {user: Omit<User, "password">}, res: Response) => {
-    console.log("abc")
-    console.log(req.user)
     res.json(req.user)
   }
 

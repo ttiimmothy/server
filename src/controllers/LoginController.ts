@@ -94,8 +94,8 @@ export class LoginController {
     })
 
     if (user) {
-      // NOTE: 400: Bad request
-      res.status(400).json({error: "The email is used"})
+      // NOTE: 409: Conflict
+      res.status(409).json({error: "The email is used"})
       return
     }
 
